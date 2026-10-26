@@ -44,8 +44,37 @@ jobs:
       - name: Run backend tests with coverage
         working-directory: DREAM-ML-backend/GEML
         run: |
-          python -m coverage run --source=. -m pytest
+          set +e
+          python -m coverage run --source=. -m pytest -ra --junitxml=test-results.xml
+          pytest_status=$?
+
           python -m coverage xml -o coverage.xml
+          python -m coverage report > coverage-report.txt
+          coverage_status=$?
+
+          {
+            echo "## Backend test and coverage results"
+            echo ""
+            echo "- Pytest exit code: \`${pytest_status}\`"
+            echo "- Coverage report exit code: \`${coverage_status}\`"
+            echo ""
+            echo '```text'
+            cat coverage-report.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          exit "$pytest_status"
+
+      - name: Upload backend test and coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-and-coverage-reports
+          if-no-files-found: warn
+          path: |
+            DREAM-ML-backend/GEML/test-results.xml
+            DREAM-ML-backend/GEML/coverage.xml
+            DREAM-ML-backend/GEML/coverage-report.txt
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -87,4 +116,3 @@ jobs:
         with:
           args: >
             -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
-
