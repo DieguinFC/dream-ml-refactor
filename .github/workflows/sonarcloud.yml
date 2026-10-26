@@ -1,0 +1,90 @@
+name: SonarCloud Analysis
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  sonarcloud:
+    name: Build, Test and Analyze
+    runs-on: ubuntu-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install backend dependencies
+        working-directory: DREAM-ML-backend/GEML
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-base.txt -r requirements-dev.txt
+
+      - name: Run backend tests with coverage
+        working-directory: DREAM-ML-backend/GEML
+        run: |
+          python -m coverage run --source=. -m pytest
+          python -m coverage xml -o coverage.xml
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: DREAM-ML-frontend/frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: DREAM-ML-frontend/frontend
+        run: npm ci
+
+      - name: Lint frontend
+        working-directory: DREAM-ML-frontend/frontend
+        run: npm run lint
+
+      - name: Build frontend
+        working-directory: DREAM-ML-frontend/frontend
+        run: npm run build
+
+      - name: Validate SonarCloud configuration
+        if: ${{ github.event_name == 'push' || env.SONAR_TOKEN != '' }}
+        run: |
+          if [ -z "$SONAR_TOKEN" ]; then
+            echo "::error::SONAR_TOKEN is required for pushes to main."
+            exit 1
+          fi
+          if [ -z "$SONAR_ORGANIZATION" ]; then
+            echo "::error::Configure the SONAR_ORGANIZATION repository variable."
+            exit 1
+          fi
+
+      - name: SonarCloud Scan
+        if: ${{ github.event_name == 'push' || env.SONAR_TOKEN != '' }}
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
+
