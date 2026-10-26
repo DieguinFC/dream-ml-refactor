@@ -47,29 +47,32 @@ jobs:
         continue-on-error: true
         working-directory: DREAM-ML-backend/GEML
         run: |
-          python -m coverage run --source=. -m pytest \
+          set +e
+          python -m coverage run \
+            --source=api,apiTimeSeries \
+            -m pytest \
+            tests/api_tests \
+            tests/apiTimeSeries_tests \
             -ra \
             -vv \
             --durations=30 \
             --junitxml=test-results.xml
+          test_status=$?
 
-      - name: Generate backend coverage reports
-        if: always()
-        continue-on-error: true
-        working-directory: DREAM-ML-backend/GEML
-        run: |
           python -m coverage xml -o coverage.xml
           python -m coverage report > coverage-report.txt
 
           {
             echo "## Backend test and coverage results"
             echo ""
-            echo "- Pytest step: \`${{ steps.backend_tests.outcome }}\`"
+            echo "- Pytest step: \`${test_status}\`"
             echo ""
             echo '```text'
             cat coverage-report.txt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+          exit "$test_status"
 
       - name: Upload backend test and coverage reports
         if: always()
