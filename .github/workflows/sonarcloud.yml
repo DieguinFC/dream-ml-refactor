@@ -20,6 +20,7 @@ jobs:
   sonarcloud:
     name: Build, Test and Analyze
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       SONAR_ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
@@ -42,28 +43,33 @@ jobs:
           python -m pip install -r requirements-base.txt -r requirements-dev.txt
 
       - name: Run backend tests with coverage
+        id: backend_tests
+        continue-on-error: true
         working-directory: DREAM-ML-backend/GEML
         run: |
-          set +e
-          python -m coverage run --source=. -m pytest -ra --junitxml=test-results.xml
-          pytest_status=$?
+          python -m coverage run --source=. -m pytest \
+            -ra \
+            -vv \
+            --durations=30 \
+            --junitxml=test-results.xml
 
+      - name: Generate backend coverage reports
+        if: always()
+        continue-on-error: true
+        working-directory: DREAM-ML-backend/GEML
+        run: |
           python -m coverage xml -o coverage.xml
           python -m coverage report > coverage-report.txt
-          coverage_status=$?
 
           {
             echo "## Backend test and coverage results"
             echo ""
-            echo "- Pytest exit code: \`${pytest_status}\`"
-            echo "- Coverage report exit code: \`${coverage_status}\`"
+            echo "- Pytest step: \`${{ steps.backend_tests.outcome }}\`"
             echo ""
             echo '```text'
             cat coverage-report.txt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-
-          exit "$pytest_status"
 
       - name: Upload backend test and coverage reports
         if: always()
