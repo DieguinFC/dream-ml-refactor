@@ -309,7 +309,7 @@ class TestEncodeCSVLogic:
     @patch('apiTimeSeries.services.pd.read_csv')
     @patch('mlflow.set_tracking_uri')
     @patch('mlflow.get_experiment_by_name')
-    @patch('mlflow.start_run')
+    @patch('apiTimeSeries.services.start_run')
     @patch('mlflow.log_param')
     @patch('mlflow.log_metric')
     @patch('mlflow.log_input')
@@ -377,7 +377,7 @@ class TestEncodeCSVLogic:
     @patch('apiTimeSeries.services.pd.read_csv')
     @patch('mlflow.set_tracking_uri')
     @patch('mlflow.get_experiment_by_name')
-    @patch('mlflow.start_run')
+    @patch('apiTimeSeries.services.start_run')
     @patch('apiTimeSeries.services.encode_data')  # Adjust import path
     def test_processed_file_not_created(self, mock_encode_data, mock_start_run, mock_get_experiment, 
                                       mock_set_uri, mock_read_csv, mock_makedirs, mock_getsize, mock_exists,

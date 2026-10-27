@@ -1,6 +1,7 @@
 name: SonarCloud Analysis
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - init-refactor-documents
@@ -44,10 +45,10 @@ jobs:
 
       - name: Run backend tests with coverage
         id: backend_tests
-        continue-on-error: true
         working-directory: DREAM-ML-backend/GEML
         run: |
           set +e
+          timeout --signal=TERM --kill-after=60s 45m \
           python -m coverage run \
             --source=api,apiTimeSeries \
             -m pytest \
@@ -59,13 +60,34 @@ jobs:
             --junitxml=test-results.xml
           test_status=$?
 
-          python -m coverage xml -o coverage.xml
-          python -m coverage report > coverage-report.txt
+          coverage_xml_status=0
+          python -m coverage xml -o coverage.xml || coverage_xml_status=$?
+
+          coverage_report_status=0
+          python -m coverage report > coverage-report.txt 2>&1 || coverage_report_status=$?
+
+          if [ "$test_status" -eq 124 ] || [ "$test_status" -eq 137 ] || [ "$test_status" -eq 143 ]; then
+            test_status_message="Tests terminated by the 45-minute timeout."
+          elif [ "$test_status" -eq 0 ]; then
+            test_status_message="All backend tests passed."
+          else
+            test_status_message="Backend tests failed with exit code ${test_status}."
+          fi
+
+          {
+            echo "Test status: ${test_status}"
+            echo "${test_status_message}"
+            echo "Coverage XML status: ${coverage_xml_status}"
+            echo "Coverage report status: ${coverage_report_status}"
+          } > test-status.txt
 
           {
             echo "## Backend test and coverage results"
             echo ""
             echo "- Pytest step: \`${test_status}\`"
+            echo "- ${test_status_message}"
+            echo "- Coverage XML step: \`${coverage_xml_status}\`"
+            echo "- Coverage report step: \`${coverage_report_status}\`"
             echo ""
             echo '```text'
             cat coverage-report.txt
@@ -84,6 +106,7 @@ jobs:
             DREAM-ML-backend/GEML/test-results.xml
             DREAM-ML-backend/GEML/coverage.xml
             DREAM-ML-backend/GEML/coverage-report.txt
+            DREAM-ML-backend/GEML/test-status.txt
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
