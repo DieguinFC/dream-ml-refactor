@@ -74,6 +74,32 @@ jobs:
             test_status_message="Backend tests failed with exit code ${test_status}."
           fi
 
+          if [ ! -s "test-results.xml" ]; then
+            cat > test-results.xml <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <testsuite name="backend-tests" tests="1" failures="1">
+            <testcase classname="workflow" name="pytest">
+              <failure message="${test_status_message:-pytest terminated before producing JUnit XML}">pytest did not produce a complete JUnit report; exit code ${test_status}</failure>
+            </testcase>
+          </testsuite>
+          EOF
+          fi
+
+          if [ ! -s "coverage-report.txt" ]; then
+            printf 'Coverage report unavailable; pytest exited with status %s.\n' "$test_status" > coverage-report.txt
+          fi
+
+          if [ ! -s "coverage.xml" ]; then
+            coverage_xml_status=1
+            cat > coverage.xml <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <coverage version="1.0" line-rate="0" branch-rate="0" lines-covered="0" lines-valid="0" branches-covered="0" branches-valid="0" complexity="0">
+            <sources/>
+            <packages/>
+          </coverage>
+          EOF
+          fi
+
           {
             echo "Test status: ${test_status}"
             echo "${test_status_message}"
