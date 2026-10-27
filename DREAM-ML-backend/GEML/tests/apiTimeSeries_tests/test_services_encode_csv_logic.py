@@ -132,8 +132,8 @@ class TestEncodeCSVLogic:
         # Act & Assert
         # This test verifies the file path logic - the file should be placed in processed/ directory
         # We expect the function to fail at a later stage (MLflow setup), but we can verify the path logic
-        with patch('builtins.open', mock_open()), \
-             patch('pandas.read_csv'), \
+        with patch('apiTimeSeries.services.open', mock_open()), \
+             patch('apiTimeSeries.services.pd.read_csv'), \
              pytest.raises(Exception):  # Will fail at MLflow setup
             data_encoding_service.encode_csv_logic(
                 csv_file=mock_processed_csv_file,
@@ -158,8 +158,8 @@ class TestEncodeCSVLogic:
         
         # Act & Assert
         # This test verifies the file path logic - the file should be placed in raw/ directory
-        with patch('builtins.open', mock_open()), \
-             patch('pandas.read_csv'), \
+        with patch('apiTimeSeries.services.open', mock_open()), \
+             patch('apiTimeSeries.services.pd.read_csv'), \
              pytest.raises(Exception):  # Will fail at MLflow setup
             data_encoding_service.encode_csv_logic(
                 csv_file=mock_csv_file,
@@ -173,7 +173,7 @@ class TestEncodeCSVLogic:
     @patch('os.path.exists')
     @patch('os.path.getsize')
     @patch('os.makedirs')
-    @patch('pandas.read_csv')
+    @patch('apiTimeSeries.services.pd.read_csv')
     def test_csv_file_already_exists_and_not_empty(self, mock_read_csv, mock_makedirs, mock_getsize, mock_exists,
                                                    data_encoding_service, mock_csv_file, valid_experiment_dir, sample_dataframe):
         """Scenario 8: CSV file already exists and is not empty"""
@@ -186,7 +186,7 @@ class TestEncodeCSVLogic:
         
         # Act & Assert
         # File should not be rewritten, existing file should be used
-        with patch('builtins.open') as mock_file_open, \
+        with patch('apiTimeSeries.services.open') as mock_file_open, \
              pytest.raises(Exception):  # Will fail at MLflow setup
             data_encoding_service.encode_csv_logic(
                 csv_file=mock_csv_file,
@@ -205,7 +205,7 @@ class TestEncodeCSVLogic:
     @patch('os.path.exists')
     @patch('os.path.getsize')
     @patch('os.makedirs')
-    @patch('pandas.read_csv')
+    @patch('apiTimeSeries.services.pd.read_csv')
     def test_missing_input_feature_column(self, mock_read_csv, mock_makedirs, mock_getsize, mock_exists,
                                         data_encoding_service, mock_csv_file, valid_experiment_dir):
         """Scenario 12: Missing input feature column"""
@@ -224,7 +224,7 @@ class TestEncodeCSVLogic:
         target_variables = ["target1"]
         
         # Act & Assert
-        with patch('builtins.open', mock_open()), \
+        with patch('apiTimeSeries.services.open', mock_open()), \
              pytest.raises(RuntimeError, match="Error al validar columnas en el archivo CSV"):
             data_encoding_service.encode_csv_logic(
                 csv_file=mock_csv_file,
@@ -238,7 +238,7 @@ class TestEncodeCSVLogic:
     @patch('os.path.exists')
     @patch('os.path.getsize')
     @patch('os.makedirs')
-    @patch('pandas.read_csv')
+    @patch('apiTimeSeries.services.pd.read_csv')
     def test_missing_target_variable_column(self, mock_read_csv, mock_makedirs, mock_getsize, mock_exists,
                                           data_encoding_service, mock_csv_file, valid_experiment_dir):
         """Scenario 13: Missing target variable column"""
@@ -257,7 +257,7 @@ class TestEncodeCSVLogic:
         target_variables = ["target1", "target2"]  # target2 doesn't exist
         
         # Act & Assert
-        with patch('builtins.open', mock_open()), \
+        with patch('apiTimeSeries.services.open', mock_open()), \
              pytest.raises(RuntimeError, match="Error al validar columnas en el archivo CSV"):
             data_encoding_service.encode_csv_logic(
                 csv_file=mock_csv_file,
@@ -273,7 +273,7 @@ class TestEncodeCSVLogic:
     @patch('os.path.exists')
     @patch('os.path.getsize')
     @patch('os.makedirs')
-    @patch('pandas.read_csv')
+    @patch('apiTimeSeries.services.pd.read_csv')
     @patch('mlflow.set_tracking_uri')
     @patch('mlflow.get_experiment_by_name')
     def test_mlflow_experiment_not_found(self, mock_get_experiment, mock_set_uri, mock_read_csv, 
@@ -290,7 +290,7 @@ class TestEncodeCSVLogic:
         target_variables = ["target1"]
         
         # Act & Assert
-        with patch('builtins.open', mock_open()), \
+        with patch('apiTimeSeries.services.open', mock_open()), \
              pytest.raises(ValueError, match="El experimento .* no fue encontrado en MLflow"):
             data_encoding_service.encode_csv_logic(
                 csv_file=mock_csv_file,
@@ -306,7 +306,7 @@ class TestEncodeCSVLogic:
     @patch('os.path.exists')
     @patch('os.path.getsize')
     @patch('os.makedirs')
-    @patch('pandas.read_csv')
+    @patch('apiTimeSeries.services.pd.read_csv')
     @patch('mlflow.set_tracking_uri')
     @patch('mlflow.get_experiment_by_name')
     @patch('mlflow.start_run')
@@ -351,7 +351,7 @@ class TestEncodeCSVLogic:
         
         # Act & Assert
         with patch('codecarbon.EmissionsTracker', return_value=mock_tracker), \
-             patch('builtins.open', mock_open(read_data='{"steps": []}')), \
+             patch('apiTimeSeries.services.open', mock_open(read_data='{"steps": []}')), \
              patch('json.load', return_value={"steps": []}), \
              patch('json.dump'):
             
@@ -374,7 +374,7 @@ class TestEncodeCSVLogic:
     @patch('os.path.exists')
     @patch('os.path.getsize')
     @patch('os.makedirs')
-    @patch('pandas.read_csv')
+    @patch('apiTimeSeries.services.pd.read_csv')
     @patch('mlflow.set_tracking_uri')
     @patch('mlflow.get_experiment_by_name')
     @patch('mlflow.start_run')

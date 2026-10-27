@@ -122,8 +122,8 @@ class TestTrainModelLogic:
     @patch('mlflow.data.from_pandas')
     @patch('mlflow.set_tag')
     @patch('subprocess.run')
-    @patch('pd.read_csv')
-    @patch('builtins.open', new_callable=mock_open)
+    @patch('apiTimeSeries.services.pd.read_csv')
+    @patch('apiTimeSeries.services.open', new_callable=mock_open)
     @patch('apiTimeSeries.services.train_arima_model')
     def test_train_model_logic_successful_execution(self, mock_train_arima, mock_file_open, mock_read_csv,
                                                    mock_subprocess, mock_set_tag, mock_from_pandas, mock_log_input,
@@ -189,8 +189,8 @@ class TestTrainModelLogic:
     @patch('mlflow.data.from_pandas')
     @patch('mlflow.set_tag')
     @patch('subprocess.run')
-    @patch('pd.read_csv')
-    @patch('builtins.open', new_callable=mock_open)
+    @patch('apiTimeSeries.services.pd.read_csv')
+    @patch('apiTimeSeries.services.open', new_callable=mock_open)
     @patch('apiTimeSeries.services.train_arima_model')
     def test_train_model_logic_success_without_val_metrics(self, mock_train_arima, mock_file_open, mock_read_csv,
                                                           mock_subprocess, mock_set_tag, mock_from_pandas, 
@@ -239,7 +239,7 @@ class TestTrainModelLogic:
     @patch('mlflow.end_run')
     @patch('mlflow.set_tag')
     @patch('os.makedirs')
-    @patch('builtins.open', side_effect=IOError("File write error"))
+    @patch('apiTimeSeries.services.open', side_effect=IOError("File write error"))
     def test_train_model_logic_runtime_error(self, mock_file_open, mock_makedirs, mock_set_tag,
                                             mock_end_run, mock_start_run, mock_get_experiment,
                                             mock_set_tracking, mock_exists):
@@ -275,8 +275,8 @@ class TestTrainModelLogic:
     @patch('mlflow.data.from_pandas')
     @patch('mlflow.set_tag')
     @patch('subprocess.run')
-    @patch('pd.read_csv')
-    @patch('builtins.open', new_callable=mock_open)
+    @patch('apiTimeSeries.services.pd.read_csv')
+    @patch('apiTimeSeries.services.open', new_callable=mock_open)
     @patch('apiTimeSeries.services.train_arima_model')
     def test_train_model_logic_arima_algorithm(self, mock_train_arima, mock_file_open, mock_read_csv,
                                               mock_subprocess, mock_set_tag, mock_from_pandas, mock_log_input,
@@ -346,8 +346,8 @@ class TestTrainModelLogic:
     @patch('mlflow.log_input')
     @patch('mlflow.data.from_pandas')
     @patch('subprocess.run')
-    @patch('pd.read_csv')
-    @patch('builtins.open', new_callable=mock_open)
+    @patch('apiTimeSeries.services.pd.read_csv')
+    @patch('apiTimeSeries.services.open', new_callable=mock_open)
     @patch('apiTimeSeries.services.train_arima_model')
     def test_train_model_logic_success_without_model_path(self, mock_train_arima, mock_file_open, mock_read_csv,
                                                          mock_subprocess, mock_from_pandas, mock_log_input,

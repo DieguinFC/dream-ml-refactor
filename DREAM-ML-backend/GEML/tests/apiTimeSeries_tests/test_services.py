@@ -43,7 +43,7 @@ class TestPreProcessingService:
         mock_csv_file = StringIO(mock_csv_content)
         expected_columns = ["col1", "col2", "col3"]
         
-        with patch('pandas.read_csv') as mock_read_csv:
+        with patch('apiTimeSeries.services.pd.read_csv') as mock_read_csv:
             mock_df = pd.DataFrame(columns=expected_columns)
             mock_read_csv.return_value = mock_df
             
@@ -66,7 +66,7 @@ class TestPreProcessingService:
         # Arrange
         mock_csv_file = Mock()
         
-        with patch('pandas.read_csv') as mock_read_csv:
+        with patch('apiTimeSeries.services.pd.read_csv') as mock_read_csv:
             mock_read_csv.side_effect = Exception("Invalid CSV format")
             
             # Act & Assert
@@ -86,7 +86,7 @@ class TestPreProcessingService:
         # Arrange
         mock_csv_file = StringIO("")
         
-        with patch('pandas.read_csv') as mock_read_csv:
+        with patch('apiTimeSeries.services.pd.read_csv') as mock_read_csv:
             mock_df = pd.DataFrame()  # Empty DataFrame
             mock_read_csv.return_value = mock_df
             
@@ -194,7 +194,7 @@ class TestPreProcessingService:
         with patch('os.makedirs'), \
              patch('os.path.exists', return_value=False), \
              patch('os.path.getsize', return_value=0), \
-             patch('builtins.open', mock_open()), \
+             patch('apiTimeSeries.services.open', mock_open()), \
              patch('os.path.dirname', return_value="/valid"), \
              patch('os.path.basename', return_value="dir"), \
              patch.dict('sys.modules', {'codecarbon': mock_codecarbon}):

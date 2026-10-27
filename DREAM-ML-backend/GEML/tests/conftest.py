@@ -6,6 +6,7 @@ import os
 from unittest.mock import MagicMock
 import pandas as pd
 import numpy as np
+import mlflow
 
 
 @pytest.fixture(scope="function")
@@ -109,3 +110,19 @@ def set_global_seed():
             pass
 
     return _set_seed
+
+
+@pytest.fixture
+def isolated_mlflow(tmp_path):
+    """Provide an isolated MLflow file store for integration tests."""
+    tracking_uri = mlflow.get_tracking_uri()
+    mlruns_dir = tmp_path / "mlruns"
+    mlruns_dir.mkdir()
+    mlflow.set_tracking_uri(mlruns_dir.as_uri())
+
+    try:
+        yield mlruns_dir
+    finally:
+        if mlflow.active_run() is not None:
+            mlflow.end_run()
+        mlflow.set_tracking_uri(tracking_uri)

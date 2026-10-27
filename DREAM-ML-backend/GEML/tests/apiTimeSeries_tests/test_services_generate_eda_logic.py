@@ -151,7 +151,7 @@ class TestGenerateEdaLogic:
     @patch('os.path.exists')
     @patch('os.makedirs')
     @patch('os.listdir')
-    @patch('pandas.read_csv')
+    @patch('apiTimeSeries.services.pd.read_csv')
     def test_correct_file_selection_for_eda(self, mock_read_csv, mock_listdir, mock_makedirs, mock_exists, mock_isdir):
         """Given processed directory has 'processed_eda_shampoo.csv' When calling generate_eda_logic with dataset_type='eda' Then should select the correct file"""
         # Arrange
@@ -193,7 +193,7 @@ class TestGenerateEdaLogic:
     @patch('os.path.exists')
     @patch('os.makedirs')
     @patch('os.listdir')
-    @patch('pandas.read_csv')
+    @patch('apiTimeSeries.services.pd.read_csv')
     def test_corrupted_csv_raises_runtime_error(self, mock_read_csv, mock_listdir, mock_makedirs, mock_exists, mock_isdir):
         """Given processed CSV file exists but is corrupted/unreadable When calling generate_eda_logic Then should raise RuntimeError"""
         # Arrange
@@ -214,7 +214,7 @@ class TestGenerateEdaLogic:
     @patch('os.path.exists')
     @patch('os.makedirs')
     @patch('os.listdir')
-    @patch('pandas.read_csv')
+    @patch('apiTimeSeries.services.pd.read_csv')
     def test_encoding_issues_csv_raises_runtime_error(self, mock_read_csv, mock_listdir, mock_makedirs, mock_exists, mock_isdir):
         """Given processed CSV file has encoding issues When calling generate_eda_logic Then should raise RuntimeError"""
         # Arrange
@@ -254,7 +254,7 @@ class TestGenerateEdaLogic:
         mock_df.isnull.return_value.sum.return_value.sum.return_value = 5
         mock_df.duplicated.return_value.sum.return_value = 2
 
-        with patch('pandas.read_csv', return_value=mock_df), \
+        with patch('apiTimeSeries.services.pd.read_csv', return_value=mock_df), \
              patch('subprocess.run'), \
              patch('mlflow.get_experiment_by_name'), \
              patch('mlflow.start_run'), \

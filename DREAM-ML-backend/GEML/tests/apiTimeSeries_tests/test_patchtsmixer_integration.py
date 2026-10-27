@@ -70,8 +70,8 @@ class TestPatchTSMixerServiceRouting:
     @patch('apiTimeSeries.services.start_run')
     @patch('apiTimeSeries.services.log_param')
     @patch('subprocess.run')
-    @patch('pandas.read_csv')
-    @patch('builtins.open', new_callable=mock_open)
+    @patch('apiTimeSeries.services.pd.read_csv')
+    @patch('apiTimeSeries.services.open', new_callable=mock_open)
     @patch('apiTimeSeries.services.train_patchtsmixer_model')
     def test_service_routes_to_patchtsmixer(
         self, mock_train_patchtsmixer, mock_file_open, mock_read_csv,
@@ -154,8 +154,8 @@ class TestPatchTSMixerServiceRouting:
     @patch('apiTimeSeries.services.start_run')
     @patch('apiTimeSeries.services.log_param')
     @patch('subprocess.run')
-    @patch('pandas.read_csv')
-    @patch('builtins.open', new_callable=mock_open)
+    @patch('apiTimeSeries.services.pd.read_csv')
+    @patch('apiTimeSeries.services.open', new_callable=mock_open)
     @patch('apiTimeSeries.services.train_patchtsmixer_model')
     def test_dvc_versioning_executes_for_patchtsmixer(
         self, mock_train_patchtsmixer, mock_file_open, mock_read_csv,
@@ -267,8 +267,8 @@ class TestPatchTSMixerServiceRouting:
     @patch('apiTimeSeries.services.start_run')
     @patch('apiTimeSeries.services.log_param')
     @patch('subprocess.run')
-    @patch('pandas.read_csv')
-    @patch('builtins.open', new_callable=mock_open)
+    @patch('apiTimeSeries.services.pd.read_csv')
+    @patch('apiTimeSeries.services.open', new_callable=mock_open)
     @patch('apiTimeSeries.services.train_patchtsmixer_model')
     def test_metrics_with_none_values_filtered(
         self, mock_train_patchtsmixer, mock_file_open, mock_read_csv,
@@ -335,8 +335,8 @@ class TestPatchTSMixerServiceRouting:
     @patch('apiTimeSeries.services.start_run')
     @patch('apiTimeSeries.services.log_param')
     @patch('subprocess.run')
-    @patch('pandas.read_csv')
-    @patch('builtins.open', new_callable=mock_open)
+    @patch('apiTimeSeries.services.pd.read_csv')
+    @patch('apiTimeSeries.services.open', new_callable=mock_open)
     @patch('apiTimeSeries.services.train_patchtsmixer_model')
     def test_step_config_includes_patchtsmixer_algorithm(
         self, mock_train_patchtsmixer, mock_file_open, mock_read_csv,

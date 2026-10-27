@@ -44,7 +44,6 @@ import TSUploadCsvCard from "./TSUploadCsvCard";
 import UploadCsvCard from "./UploadCsvCard";
 import TSEncodeCard from "./TSEncodeCard";
 import EncodeCard from "./EncodeCard";
-import PipelineConfigCard from "./PipelineConfigCard";
 import ExecutePipelineCard from "./ExecutePipelineCard";
 import EdaCard from "./EdaCard";
 import TSEdaCard from "./TSEdaCard";
