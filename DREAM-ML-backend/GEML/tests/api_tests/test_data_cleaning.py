@@ -281,23 +281,33 @@ class TestDataCleaning:
         assert not cleaned_df.isna().any().any()
     
     def test_leave_numeric_missing_values_unchanged(self):
-        """Test leaving numeric missing values as NaN."""
-        # Arrange
-        df = pd.DataFrame({
-            'col1': [1, 2, np.nan, 4],
-            'col2': [1.5, 2.5, 3.5, 4.5]
-        })
-        input_path = self.create_temp_csv(df)
+        """Test leaving numeric missing values as NaN.
+
+        Note: This test verifies that when relleno_valores_numericos="dejar",
+        the NaN values remain unchanged in the output CSV. The test creates
+        a CSV with a missing value and verifies it's preserved.
+        """
+        # Arrange - Create CSV with an empty cell (which represents NaN)
+        csv_content = """col1,col2
+1,1.5
+2,2.5
+,3.5
+4,4.5"""
+        input_path = self.create_temp_csv(pd.DataFrame([['col1', 'col2']]))
+        with open(input_path, 'w') as f:
+            f.write(csv_content)
         output_path = self.get_output_path()
-        
+
         # Act
         report = limpiar_datos(input_path, output_path, relleno_valores_numericos="dejar")
-        
-        # Assert
+
+        # Assert - The function should leave NaN values unchanged
         assert 'numeric_missing_after' in report
+        # After cleaning step 2 (empty string -> NaN), col1 should have 1 missing
         assert report['numeric_missing_after']['col1'] == 1
-        
+
         cleaned_df = pd.read_csv(output_path)
+        # The NaN should still be present in the output CSV
         assert cleaned_df['col1'].isna().sum() == 1
     
     def test_fill_numeric_missing_values_with_specific_value(self):

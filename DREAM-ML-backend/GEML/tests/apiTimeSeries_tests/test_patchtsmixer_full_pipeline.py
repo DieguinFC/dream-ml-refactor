@@ -60,6 +60,17 @@ def configure_test_logging():
     api_logger.propagate = original_propagate
 
 
+@pytest.fixture(autouse=True)
+def setup_mlruns_directory(tmp_path):
+    """
+    Create mlruns directory in tmp_path before each test.
+    This is required for PatchTSMixer tests that use MLflow.
+    """
+    mlruns_dir = os.path.join(tmp_path, "mlruns")
+    os.makedirs(mlruns_dir, exist_ok=True)
+    yield
+
+
 # ======================================================================================
 # HELPER FUNCTIONS
 # ======================================================================================
