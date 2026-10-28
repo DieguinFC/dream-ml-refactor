@@ -386,13 +386,11 @@ def train_model(request):
     
     try:
         # 1. Validación inicial de la solicitud
-        # Mantener el orden de validación esperado por los tests: primero los datos de configuración,
-        # luego el archivo CSV. Eso evita devolver errores de archivo cuando la solicitud está incompleta.
-        if 'data' not in request.POST:
-            raise ValueError("Datos de configuración faltantes")
-
         if 'file' not in request.FILES:
             raise ValueError("No se encontró archivo CSV en la solicitud")
+        
+        if 'data' not in request.POST:
+            raise ValueError("Datos de configuración faltantes en el cuerpo de la solicitud")
 
         # 2. Parsear y validar parámetros
         data = json.loads(request.POST['data'])

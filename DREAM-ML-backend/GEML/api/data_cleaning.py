@@ -65,7 +65,7 @@ def limpiar_datos(csv_input: str, csv_output_eda: str, eliminar_duplicados=True,
         after_drop = df.shape[0]
         report["numeric_rows_dropped_due_to_na"] = int(before_drop - after_drop)
     elif relleno_valores_numericos == "dejar":
-        # No se realiza cambio en los NaN y se registra el conteo final para validación
+        # No se realiza cambio en los NaN
         report["numeric_missing_after"] = df[numeric_cols].isna().sum().to_dict()
     else:
         imputations = {}

@@ -75,28 +75,47 @@ mlflow_process = None  # Global variable for MLflow process
 
 def create_experiment_logic(base_dir: str) -> Dict[str, str]:
     """
-    Crea o reutiliza un experimento de forma idempotente.
+    Crea un nuevo experimento en el directorio base especificado.
+    
+    Detiene cualquier instancia activa de MLflow, crea una nueva estructura de directorios,
+    inicializa MLflow con una base de datos SQLite compartida y configura el pipeline inicial.
 
-    El comportamiento esperado por tests y pipelines es:
-    - No depender del estado local de MLflow activo.
-    - Reutilizar un experimento si ya existe con la misma ubicación de artefactos.
-    - Si existe el mismo nombre pero con otra ubicación, crear uno nuevo con sufijo
-      para evitar conflictos de artifact_location.
+    Parámetros:
+        base_dir (str): Ruta base donde se almacenarán los experimentos
+
+    Retorna:
+        dict: Diccionario con metadatos del experimento creado:
+            - experiment_id: UUID único del experimento
+            - experiment_dir: Ruta completa del directorio del experimento
+            - artifact_uri: URI para artefactos de MLflow
+            - mlflow_tracking_uri: URI de seguimiento de MLflow
+            - mlflow_experiment_id: ID del experimento en MLflow
+            - experiment_name: Nombre del experimento
+
+    Excepciones:
+        ValueError: Si la ruta base no es válida o si se detecta un experimento duplicado
+        OSError: Si hay errores al crear directorios o archivos
     """
     global mlflow_process
 
+    # Validación de la ruta base
     if not base_dir or not os.path.isdir(base_dir):
         raise ValueError("La ruta base proporcionada no existe o no es un directorio válido")
 
+    # Detener servidor MLflow si está activo
     if mlflow_process and mlflow_process.poll() is None:
         try:
             logger.info("Deteniendo servidor MLflow activo...")
             parent = psutil.Process(mlflow_process.pid)
+            
+            # Terminar procesos hijos recursivamente
             for child in parent.children(recursive=True):
                 try:
                     child.terminate()
                 except psutil.NoSuchProcess:
                     logger.debug(f"Proceso hijo {child.pid} ya terminado")
+            
+            # Terminar proceso principal
             mlflow_process.terminate()
             mlflow_process.wait(timeout=5)
             logger.info("Servidor MLflow detenido exitosamente")
@@ -105,9 +124,10 @@ def create_experiment_logic(base_dir: str) -> Dict[str, str]:
         finally:
             mlflow_process = None
 
+    # Configurar tracking URI para MLflow
     shared_db_path = os.path.join(base_dir, "shared_mlflow.db")
     shared_tracking_uri = f"sqlite:///{shared_db_path}"
-
+    
     try:
         mlflow.set_tracking_uri(shared_tracking_uri)
         logger.info(f"Tracking URI configurado: {shared_tracking_uri}")
@@ -115,77 +135,74 @@ def create_experiment_logic(base_dir: str) -> Dict[str, str]:
         logger.error(f"Error configurando MLflow: {str(e)}")
         raise RuntimeError("No se pudo configurar MLflow") from e
 
-    now = datetime.now()
-    timestamp = now.strftime('%Y%m%d_%H%M%S')
-    experiment_id = uuid.uuid4().hex
-    base_experiment_name = f"Exp_{timestamp}_{experiment_id[:8]}"
-    experiment_name = base_experiment_name
+    # Crear estructura de directorios usando hora local del sistema
+    now = datetime.now()  # Hora local del sistema
+    timestamp = now.strftime('%Y%m%d_%H%M%S')  # Formato compacto
+    experiment_id = uuid.uuid4().hex  # Hex para nombres más cortos
+    experiment_name = f"Exp_{timestamp}_{experiment_id[:8]}"  # Nombre conciso
     experiment_dir = os.path.join(base_dir, experiment_name)
+    
+    try:
+        os.makedirs(experiment_dir, exist_ok=True)
+        logger.info(f"Directorio de experimento creado: {experiment_dir}")
+    except OSError as e:
+        logger.error(f"Error creando directorio: {str(e)}")
+        raise OSError(f"No se pudo crear el directorio del experimento") from e
 
+    # Directorio para artefactos
+    artifact_dir = os.path.join(experiment_dir, "artifacts")
+    artifact_uri = f"file:///{os.path.abspath(artifact_dir)}"
+    
+    try:
+        os.makedirs(artifact_dir, exist_ok=True)
+        logger.info(f"Directorio de artefactos creado: {artifact_dir}")
+    except OSError as e:
+        logger.error(f"Error creando directorio de artefactos: {str(e)}")
+        raise OSError(f"No se pudo crear el directorio de artefactos") from e
+
+    # Crear/recuperar experimento en MLflow
     client = MlflowClient()
-    candidate_name = experiment_name
-    candidate_dir = experiment_dir
-    artifact_uri = None
-    mlflow_experiment_id = None
-
-    while True:
-        artifact_dir = os.path.join(candidate_dir, "artifacts")
-        artifact_uri = f"file:///{os.path.abspath(artifact_dir).replace('\\', '/')}"
-
-        try:
-            os.makedirs(candidate_dir, exist_ok=True)
-            os.makedirs(artifact_dir, exist_ok=True)
-            logger.info(f"Directorio de experimento listo: {candidate_dir}")
-        except OSError as e:
-            logger.error(f"Error creando directorio: {str(e)}")
-            raise OSError("No se pudo crear el directorio del experimento") from e
-
-        existing_experiment = client.get_experiment_by_name(candidate_name)
-        if existing_experiment and existing_experiment.artifact_location == artifact_uri:
-            logger.info(f"Reutilizando experimento existente: {candidate_name}")
-            mlflow_experiment_id = existing_experiment.experiment_id
-            experiment_dir = candidate_dir
-            experiment_name = candidate_name
-            break
-
-        if existing_experiment and existing_experiment.artifact_location != artifact_uri:
-            logger.warning(
-                f"Nombre de experimento ya existe con otra artifact_location. "
-                f"Creando uno nuevo: {candidate_name}"
-            )
-            candidate_name = f"{base_experiment_name}_{uuid.uuid4().hex[:8]}"
-            candidate_dir = os.path.join(base_dir, candidate_name)
-            continue
-
+    existing_experiment = client.get_experiment_by_name(experiment_name)
+    
+    if existing_experiment:
+        # Verificar consistencia en la ubicación de artefactos
+        if existing_experiment.artifact_location != artifact_uri:
+            error_msg = (f"Conflicto: Experimento '{experiment_name}' ya existe "
+                         f"con diferente ubicación de artefactos")
+            logger.error(error_msg)
+            raise ValueError(error_msg)
+        
+        mlflow_experiment_id = existing_experiment.experiment_id
+        logger.info(f"Usando experimento existente: {experiment_name}")
+    else:
         try:
             mlflow_experiment_id = client.create_experiment(
-                name=candidate_name,
-                artifact_location=artifact_uri,
+                name=experiment_name,
+                artifact_location=artifact_uri
             )
-            logger.info(f"Nuevo experimento MLflow creado: {candidate_name} (ID: {mlflow_experiment_id})")
-            experiment_dir = candidate_dir
-            experiment_name = candidate_name
-            break
+            logger.info(f"Nuevo experimento MLflow creado: {experiment_name} (ID: {mlflow_experiment_id})")
         except Exception as e:
             logger.error(f"Error creando experimento en MLflow: {str(e)}")
             raise RuntimeError("Fallo al crear experimento en MLflow") from e
 
+    # Configurar experimento activo
     try:
         mlflow.set_experiment(experiment_name)
         logger.debug(f"Experimento configurado como activo: {experiment_name}")
     except Exception as e:
         logger.warning(f"Error configurando experimento activo: {str(e)}")
 
+    # Crear configuración inicial del pipeline
     pipeline_config = {
         "experiment_id": experiment_id,
         "experiment_name": experiment_name,
         "created_at": now.isoformat(),
-        "server_timezone": time.tzname,
+        "server_timezone": time.tzname,  # Registrar la zona horaria del sistema
         "steps": []
     }
-
+    
     pipeline_config_path = os.path.join(experiment_dir, "pipeline_config.json")
-
+    
     try:
         with open(pipeline_config_path, 'w', encoding='utf-8') as f:
             json.dump(pipeline_config, f, indent=2, ensure_ascii=False)
@@ -201,8 +218,8 @@ def create_experiment_logic(base_dir: str) -> Dict[str, str]:
         "mlflow_tracking_uri": shared_tracking_uri,
         "mlflow_experiment_id": mlflow_experiment_id,
         "experiment_name": experiment_name,
-        "server_time": now.isoformat(),
-        "server_timezone": time.tzname
+        "server_time": now.isoformat(),  # Hora local del servidor
+        "server_timezone": time.tzname   # Zona horaria del sistema
     }
 
 
@@ -1080,51 +1097,19 @@ def train_model_logic(dataset_file, data: dict) -> dict:
     if algorithm not in supported_algorithms:
         raise ValueError(f"Algoritmo no soportado. Use: {', '.join(supported_algorithms)}")
 
-    # 2. Modo mock/test: desacopla la lógica de servicio del entrenamiento real para
-    # pruebas unitarias o pipelines que solo validan la orquestación.
-    mock_training = data.get("mock_training") or data.get("skip_training") or os.environ.get("DREAM_ML_UNIT_TEST") == "1"
-    if mock_training:
-        logger.warning("Entrenamiento real omitido: se usa mock para pruebas de servicio/lógica.")
-        mock_model_path = data.get("mock_model_path") or os.path.join(experiment_dir, "trained", "mock_model.pkl")
-        os.makedirs(os.path.dirname(mock_model_path), exist_ok=True)
-        with open(mock_model_path, 'wb') as fh:
-            import pickle
-            pickle.dump({"mock": True, "algorithm": algorithm, "experiment_dir": experiment_dir}, fh)
-
-        mock_metrics = {
-            "val_metrics": {"accuracy": 0.99, "loss": 0.01},
-            "test_metrics": {"accuracy": 0.98, "loss": 0.02}
-        }
-        return {
-            "status": "Modelo mockeado correctamente para pruebas de lógica.",
-            "val_metrics": mock_metrics["val_metrics"],
-            "test_metrics": mock_metrics["test_metrics"],
-            "model_path": mock_model_path,
-            "step_config": {
-                "step": f"train_{algorithm}",
-                "run_id": data.get("run_id") or "mock-run",
-                "algorithm": algorithm,
-                "dataset_path": None,
-                "model_path": os.path.relpath(mock_model_path, experiment_dir),
-                "metrics": {"val": mock_metrics["val_metrics"], "test": mock_metrics["test_metrics"]},
-                "timestamp": datetime.now().isoformat(),
-                "mocked": True,
-            },
-            "run_id": data.get("run_id") or "mock-run",
-        }
-
     # 2. Configurar MLflow
     base_dir = os.path.dirname(experiment_dir)
     shared_db_path = os.path.join(base_dir, "shared_mlflow.db")
     mlflow.set_tracking_uri(f"sqlite:///{shared_db_path}")
 
+    
     # Obtener el experimento de MLflow
-    experiment_name = os.path.basename(experiment_dir)
+    experiment_name = os.path.basename(experiment_dir)  # Nombre del experimento = nombre del directorio
     mlflow_experiment = mlflow.get_experiment_by_name(experiment_name)
-
+    
     if not mlflow_experiment:
         raise ValueError(f"No se encontró el experimento: {experiment_name}")
-
+    
     mlflow_experiment_id = mlflow_experiment.experiment_id
 
     # 3. Iniciar un run único en MLflow
@@ -1157,19 +1142,17 @@ def train_model_logic(dataset_file, data: dict) -> dict:
             subprocess.run(["dvc", "push", dataset_path], cwd=experiment_dir, check=True)
 
             # 5. Ejecutar el entrenamiento (llamando a la función correspondiente)
-            df_train = pd.read_csv(dataset_path)
+            #Registrar el dataset de entrada en MLflow antes de entrenar
+            df_train = pd.read_csv(dataset_path)  # Leer dataset de entrenamiento
             train_dataset = mlflow.data.from_pandas(
-                df_train,
-                source=None,
-                name="Dataset de Entrenamiento"
+            df_train, 
+            source=None,  # Se omite el source para evitar warnings
+            name="Dataset de Entrenamiento"
             )
-            mlflow.log_input(train_dataset, context="train_data")
-
+            mlflow.log_input(train_dataset, context="train_data")  # Registrar dataset en MLflow
+            
             mlflow.log_param("step", f"{algorithm}_training")
-
-            if data.get("model_factory") is not None and callable(data.get("model_factory")):
-                result = data["model_factory"](dataset_path=dataset_path, data=data, experiment_dir=experiment_dir)
-            elif algorithm == "logistic":
+            if algorithm == "logistic":
                 result = train_logistic_regression_model(
                     dataset_path=dataset_path,
                     data=data,
@@ -1187,9 +1170,8 @@ def train_model_logic(dataset_file, data: dict) -> dict:
                     data=data,
                     experiment_dir=experiment_dir
                 )
-            else:
-                result = {}
-
+            
+            # 6. Versionar el modelo con DVC
             model_path = result.get("model_path")
             if model_path and os.path.exists(model_path):
                 subprocess.run(["dvc", "add", model_path], cwd=experiment_dir, check=True)
@@ -1200,6 +1182,7 @@ def train_model_logic(dataset_file, data: dict) -> dict:
                 )
                 subprocess.run(["dvc", "push", model_path], cwd=experiment_dir, check=True)
 
+            # 7. Consolidar y registrar métricas en MLflow
             combined_metrics = {}
             if "val_metrics" in result:
                 filtered_val_metrics = {k: v for k, v in result["val_metrics"].items() if v is not None}
@@ -1212,6 +1195,7 @@ def train_model_logic(dataset_file, data: dict) -> dict:
 
             mlflow.set_tag("training_phase", "completed")
 
+            # 8. Preparar el diccionario step_config para actualizar el pipeline_config.json
             step_config = {
                 "step": f"train_{algorithm}",
                 "run_id": run_id,
@@ -1222,6 +1206,7 @@ def train_model_logic(dataset_file, data: dict) -> dict:
                 "timestamp": datetime.now().isoformat()
             }
 
+            # Retornar la información del entrenamiento y el step_config
             return {
                 "status": "Modelo registrado correctamente en MLflow.",
                 "val_metrics": result.get("val_metrics", {}),
@@ -1267,16 +1252,11 @@ def run_pipeline_logic(data):
         if not pipeline_config or "steps" not in pipeline_config:
             raise ValueError("No se recibió pipeline_config o no tiene 'steps'.")
 
-        # 1. Reutilizar experimento si ya se indicó uno; si no, crear uno nuevo.
-        requested_experiment_dir = data.get("experiment_dir")
-        if requested_experiment_dir and os.path.isdir(requested_experiment_dir):
-            new_experiment_dir = requested_experiment_dir
-            logger.info(f"Reutilizando experimento existente: {new_experiment_dir}")
-        else:
-            logger.info("Creando nuevo experimento...")
-            create_exp_result = create_experiment_logic(base_dir)
-            new_experiment_dir = create_exp_result["experiment_dir"]
-            logger.info(f"Nuevo experimento creado: {new_experiment_dir}")
+        # 1. Crear NUEVO experimento.
+        logger.info("Creando nuevo experimento...")
+        create_exp_result = create_experiment_logic(base_dir)
+        new_experiment_dir = create_exp_result["experiment_dir"]
+        logger.info(f"Nuevo experimento creado: {new_experiment_dir}")
         data["experiment_dir"] = new_experiment_dir
 
         # 2. Inicializar DVC y configurar remoto.

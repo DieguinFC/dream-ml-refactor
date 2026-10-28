@@ -983,48 +983,19 @@ class TrainModelService():
         if algorithm not in supported_algorithms:
             raise ValueError(f"Algoritmo no soportado. Use: {', '.join(supported_algorithms)}")
 
-        mock_training = data.get("mock_training") or data.get("skip_training") or os.environ.get("DREAM_ML_UNIT_TEST") == "1"
-        if mock_training:
-            logger.warning("Entrenamiento real omitido: se usa mock para pruebas de lógica y servicios.")
-            mock_model_path = data.get("mock_model_path") or os.path.join(experiment_dir, "trained", "mock_model.pkl")
-            os.makedirs(os.path.dirname(mock_model_path), exist_ok=True)
-            with open(mock_model_path, 'wb') as fh:
-                import pickle
-                pickle.dump({"mock": True, "algorithm": algorithm, "experiment_dir": experiment_dir}, fh)
-
-            mock_metrics = {
-                "val_metrics": {"mae": 0.1, "rmse": 0.2},
-                "test_metrics": {"mae": 0.15, "rmse": 0.25}
-            }
-            return {
-                "status": "Modelo mockeado correctamente para pruebas de lógica.",
-                "val_metrics": mock_metrics["val_metrics"],
-                "test_metrics": mock_metrics["test_metrics"],
-                "model_path": mock_model_path,
-                "step_config": {
-                    "step": f"train_{algorithm}",
-                    "run_id": data.get("run_id") or "mock-run",
-                    "algorithm": algorithm,
-                    "dataset_path": None,
-                    "model_path": os.path.relpath(mock_model_path, experiment_dir),
-                    "metrics": {"val": mock_metrics["val_metrics"], "test": mock_metrics["test_metrics"]},
-                    "timestamp": datetime.now().isoformat(),
-                    "mocked": True,
-                },
-                "run_id": data.get("run_id") or "mock-run"
-            }
-
         # 2. Configurar MLflow
         base_dir = os.path.dirname(experiment_dir)
         shared_db_path = os.path.join(base_dir, "shared_mlflow.db")
         mlflow.set_tracking_uri(f"sqlite:///{shared_db_path}")
 
-        experiment_name = os.path.basename(experiment_dir)
+        
+        # Obtener el experimento de MLflow
+        experiment_name = os.path.basename(experiment_dir)  # Nombre del experimento = nombre del directorio
         mlflow_experiment = mlflow.get_experiment_by_name(experiment_name)
-
+        
         if not mlflow_experiment:
             raise ValueError(f"No se encontró el experimento: {experiment_name}")
-
+        
         mlflow_experiment_id = mlflow_experiment.experiment_id
 
         # 3. Iniciar un run único en MLflow
@@ -1033,6 +1004,7 @@ class TrainModelService():
             logger.info(f"Run de MLflow iniciado - ID: {run_id}")
 
             try:
+                # 4. Guardar dataset y versionar con DVC
                 trained_dir = os.path.join(experiment_dir, "trained")
                 os.makedirs(trained_dir, exist_ok=True)
 
@@ -1055,18 +1027,19 @@ class TrainModelService():
                 )
                 subprocess.run(["dvc", "push", dataset_path], cwd=experiment_dir, check=True)
 
-                df_train = pd.read_csv(dataset_path, encoding='utf-8')
+                # 5. Ejecutar el entrenamiento (llamando a la función correspondiente)
+                #Registrar el dataset de entrada en MLflow antes de entrenar
+                # Fix: Explicit UTF-8 encoding for cross-platform reproducibility
+                df_train = pd.read_csv(dataset_path, encoding='utf-8')  # Leer dataset de entrenamiento
                 train_dataset = mlflow.data.from_pandas(
-                    df_train,
-                    source=None,
-                    name="Dataset de Entrenamiento"
+                df_train, 
+                source=None,  # Se omite el source para evitar warnings
+                name="Dataset de Entrenamiento"
                 )
-                mlflow.log_input(train_dataset, context="train_data")
-
+                mlflow.log_input(train_dataset, context="train_data")  # Registrar dataset en MLflow
+                
                 mlflow.log_param("step", f"{algorithm}_training")
-                if data.get("model_factory") is not None and callable(data.get("model_factory")):
-                    result = data["model_factory"](dataset_path=dataset_path, data=data, experiment_dir=experiment_dir)
-                elif algorithm == "arima":
+                if algorithm == "arima":
                     result = train_arima_model(
                         dataset_path=dataset_path,
                         data=data,
@@ -1090,9 +1063,8 @@ class TrainModelService():
                         data=data,
                         experiment_dir=experiment_dir
                     )
-                else:
-                    result = {}
 
+                # 6. Versionar el modelo con DVC
                 model_path = result.get("model_path")
                 if model_path and os.path.exists(model_path):
                     subprocess.run(["dvc", "add", model_path], cwd=experiment_dir, check=True)
@@ -1103,6 +1075,7 @@ class TrainModelService():
                     )
                     subprocess.run(["dvc", "push", model_path], cwd=experiment_dir, check=True)
 
+                # 7. Consolidar y registrar métricas en MLflow
                 combined_metrics = {}
                 if "val_metrics" in result:
                     filtered_val_metrics = {k: v for k, v in result["val_metrics"].items() if v is not None}
@@ -1115,6 +1088,7 @@ class TrainModelService():
 
                 mlflow.set_tag("training_phase", "completed")
 
+                # 8. Preparar el diccionario step_config para actualizar el pipeline_config.json
                 step_config = {
                     "step": f"train_{algorithm}",
                     "run_id": run_id,
@@ -1125,6 +1099,7 @@ class TrainModelService():
                     "timestamp": datetime.now().isoformat()
                 }
 
+                # Retornar la información del entrenamiento y el step_config
                 return {
                     "status": "Modelo registrado correctamente en MLflow.",
                     "val_metrics": result.get("val_metrics", {}),
@@ -1171,15 +1146,11 @@ class PipelineService():
             if not pipeline_config or "steps" not in pipeline_config:
                 raise ValueError("No se recibió pipeline_config o no tiene 'steps'.")
 
-            requested_experiment_dir = data.get("experiment_dir")
-            if requested_experiment_dir and os.path.isdir(requested_experiment_dir):
-                new_experiment_dir = requested_experiment_dir
-                logger.info(f"Reutilizando experimento existente: {new_experiment_dir}")
-            else:
-                logger.info("Creando nuevo experimento...")
-                create_exp_result = create_experiment_logic(base_dir)
-                new_experiment_dir = create_exp_result["experiment_dir"]
-                logger.info(f"Nuevo experimento creado: {new_experiment_dir}")
+            # 1. Crear NUEVO experimento.
+            logger.info("Creando nuevo experimento...")
+            create_exp_result = create_experiment_logic(base_dir)
+            new_experiment_dir = create_exp_result["experiment_dir"]
+            logger.info(f"Nuevo experimento creado: {new_experiment_dir}")
             data["experiment_dir"] = new_experiment_dir
 
             # 2. Inicializar DVC y configurar remoto.
