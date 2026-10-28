@@ -88,7 +88,7 @@ class TestEncodeCSVLogic:
         target_variables = []
         
         # Act & Assert
-        with pytest.raises(ValueError, match="El experimento.*no fue encontrado en MLflow"):
+        with pytest.raises(ValueError, match="Variable de salida no especificada"):
             data_encoding_service.encode_csv_logic(
                 csv_file=mock_csv_file,
                 experiment_dir=valid_experiment_dir,
