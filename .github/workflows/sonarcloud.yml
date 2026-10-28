@@ -20,7 +20,7 @@ jobs:
   sonarcloud:
     name: Build, Test and Analyze
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 120
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       SONAR_ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
@@ -44,20 +44,21 @@ jobs:
 
       - name: Run backend tests with coverage
         id: backend_tests
-        continue-on-error: true
         working-directory: DREAM-ML-backend/GEML
         run: |
-          set +e
-          python -m coverage run \
-            --source=api,apiTimeSeries \
-            -m pytest \
-            tests/api_tests \
-            tests/apiTimeSeries_tests \
-            -ra \
-            -vv \
-            --durations=30 \
-            --junitxml=test-results.xml
-          test_status=$?
+          if python -m coverage run \
+              --source=api,apiTimeSeries \
+              -m pytest \
+              tests/api_tests \
+              tests/apiTimeSeries_tests \
+              -ra \
+              -vv \
+              --durations=30 \
+              --junitxml=test-results.xml; then
+            test_status=0
+          else
+            test_status=$?
+          fi
 
           python -m coverage xml -o coverage.xml
           python -m coverage report > coverage-report.txt
@@ -97,10 +98,12 @@ jobs:
         run: npm ci
 
       - name: Lint frontend
+        id: frontend_lint
         working-directory: DREAM-ML-frontend/frontend
         run: npm run lint
 
       - name: Build frontend
+        id: frontend_build
         working-directory: DREAM-ML-frontend/frontend
         run: npm run build
 
@@ -117,7 +120,7 @@ jobs:
           fi
 
       - name: SonarCloud Scan
-        if: ${{ github.event_name == 'push' || env.SONAR_TOKEN != '' }}
+        if: ${{ success() && (github.event_name == 'push' || env.SONAR_TOKEN != '') }}
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
