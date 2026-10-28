@@ -21,7 +21,7 @@ jobs:
   sonarcloud:
     name: Build, Test and Analyze
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 90
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       SONAR_ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
@@ -42,6 +42,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements-base.txt -r requirements-dev.txt
+          python -m pip install pytest-timeout==2.3.1
 
       - name: Run backend tests with coverage
         id: backend_tests
@@ -55,6 +56,8 @@ jobs:
               -ra \
               -vv \
               --durations=30 \
+              --timeout=1800 \
+              --timeout-method=signal \
               --junitxml=test-results.xml; then
             test_status=0
           else
@@ -67,12 +70,10 @@ jobs:
           coverage_report_status=0
           python -m coverage report > coverage-report.txt 2>&1 || coverage_report_status=$?
 
-          if [ "$test_status" -eq 124 ] || [ "$test_status" -eq 137 ] || [ "$test_status" -eq 143 ]; then
-            test_status_message="Tests terminated by the 45-minute timeout."
-          elif [ "$test_status" -eq 0 ]; then
+          if [ "$test_status" -eq 0 ]; then
             test_status_message="All backend tests passed."
           else
-            test_status_message="Backend tests failed with exit code ${test_status}."
+            test_status_message="Backend tests failed or a test exceeded the 30-minute per-test timeout (exit code ${test_status})."
           fi
 
           if [ ! -s "test-results.xml" ]; then
