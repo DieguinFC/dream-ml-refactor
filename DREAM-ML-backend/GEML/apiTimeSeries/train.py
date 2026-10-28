@@ -744,18 +744,39 @@ def validate_pipeline_config_schema(config: Dict, strict: bool = False) -> bool:
         >>> validate_pipeline_config_schema(config, strict=False)
         True
     """
+    config = dict(config or {})
+
+    # Backward compatibility: accept both the newer nested format and legacy flat keys
+    # used by older tests and training logic.
+    if "step_name" in config and "step" not in config:
+        config["step"] = config["step_name"]
+
+    if "hyperparameter_search" not in config and isinstance(config.get("hyperparameter_search_strategy"), str):
+        config["hyperparameter_search"] = {
+            "strategy": config["hyperparameter_search_strategy"],
+            "iterations_total": config.get("iterations_total"),
+            "best_iteration": config.get("best_iteration"),
+            "best_val_loss": config.get("best_val_loss"),
+            "grid_search_params": config.get("grid_search_params"),
+            "random_search_params": config.get("random_search_params"),
+            "n_random_iterations": config.get("n_random_iterations"),
+            "memory_profiling": config.get("memory_profiling"),
+        }
+
     version = config.get("schema_version", "1.0")
     errors = []
 
     # ===== Version 1.1 Validation (New Format - Phase 3A+) =====
     if version == "1.1":
-        # Required top-level fields
-        required_top_level = ["schema_version", "step", "algorithm", "params",
+        # Required top-level fields. Accept both "step" and the older "step_name" alias.
+        required_top_level = ["schema_version", "algorithm", "params",
                                "metrics", "hyperparameter_search", "lstm_metadata"]
-
         for field in required_top_level:
             if field not in config:
                 errors.append(f"Missing required field: {field}")
+
+        if "step" not in config and "step_name" not in config:
+            errors.append("Missing required field: step")
 
         # Validate metrics completeness (all 6 metrics required)
         if "metrics" in config:
@@ -775,6 +796,10 @@ def validate_pipeline_config_schema(config: Dict, strict: bool = False) -> bool:
         # Validate hyperparameter_search structure
         if "hyperparameter_search" in config:
             hs = config["hyperparameter_search"]
+            if not isinstance(hs, dict):
+                errors.append("hyperparameter_search must be an object")
+                hs = {}
+
             required_hs_fields = ["strategy", "iterations_total", "best_iteration", "best_val_loss"]
 
             for field in required_hs_fields:
@@ -848,7 +873,7 @@ def validate_pipeline_config_schema(config: Dict, strict: bool = False) -> bool:
     elif version == "1.0":
         # Relaxed validation for legacy format (pre-Phase 3A)
         logger.info("Validating legacy pipeline_config schema (v1.0) - relaxed validation")
-        if "step" not in config:
+        if "step" not in config and "step_name" not in config:
             errors.append("Missing required field: step")
         if "algorithm" not in config:
             errors.append("Missing required field: algorithm")
