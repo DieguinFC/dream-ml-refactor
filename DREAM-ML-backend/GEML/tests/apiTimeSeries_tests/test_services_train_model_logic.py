@@ -115,7 +115,7 @@ class TestTrainModelLogic:
     @patch('os.makedirs')
     @patch('mlflow.set_tracking_uri')
     @patch('mlflow.get_experiment_by_name')
-    @patch('mlflow.start_run')
+    @patch('apiTimeSeries.services.start_run')
     @patch('mlflow.log_param')
     @patch('mlflow.log_metrics')
     @patch('mlflow.log_input')
@@ -182,7 +182,7 @@ class TestTrainModelLogic:
     @patch('os.makedirs')
     @patch('mlflow.set_tracking_uri')
     @patch('mlflow.get_experiment_by_name')
-    @patch('mlflow.start_run')
+    @patch('apiTimeSeries.services.start_run')
     @patch('mlflow.log_param')
     @patch('mlflow.log_metrics')
     @patch('mlflow.log_input')
@@ -235,7 +235,7 @@ class TestTrainModelLogic:
     @patch('os.path.exists')
     @patch('mlflow.set_tracking_uri')
     @patch('mlflow.get_experiment_by_name')
-    @patch('mlflow.start_run')
+    @patch('apiTimeSeries.services.start_run')
     @patch('mlflow.end_run')
     @patch('mlflow.set_tag')
     @patch('os.makedirs')
@@ -269,8 +269,9 @@ class TestTrainModelLogic:
     @patch('os.makedirs')
     @patch('mlflow.set_tracking_uri')
     @patch('mlflow.get_experiment_by_name')
-    @patch('mlflow.start_run')
+    @patch('apiTimeSeries.services.start_run')
     @patch('mlflow.log_param')
+    @patch('mlflow.log_metrics')
     @patch('mlflow.log_input')
     @patch('mlflow.data.from_pandas')
     @patch('mlflow.set_tag')
@@ -280,7 +281,7 @@ class TestTrainModelLogic:
     @patch('apiTimeSeries.services.train_arima_model')
     def test_train_model_logic_arima_algorithm(self, mock_train_arima, mock_file_open, mock_read_csv,
                                               mock_subprocess, mock_set_tag, mock_from_pandas, mock_log_input,
-                                              mock_log_param, mock_start_run, mock_get_experiment,
+                                              mock_log_metrics, mock_log_param, mock_start_run, mock_get_experiment,
                                               mock_set_tracking, mock_makedirs, mock_getsize, mock_exists):
         """
         Given a valid request with algorithm="arima" and problem_type="ts_forecasting"
@@ -341,7 +342,7 @@ class TestTrainModelLogic:
     @patch('os.makedirs')
     @patch('mlflow.set_tracking_uri')
     @patch('mlflow.get_experiment_by_name')
-    @patch('mlflow.start_run')
+    @patch('apiTimeSeries.services.start_run')
     @patch('mlflow.log_param')
     @patch('mlflow.log_input')
     @patch('mlflow.data.from_pandas')
