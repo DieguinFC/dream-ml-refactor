@@ -65,6 +65,10 @@ def setup_mlruns_directory(tmp_path):
     """
     Create mlruns directory in tmp_path before each test.
     This is required for PatchTSMixer tests that use MLflow.
+    
+    NOTE: This fixture may not be sufficient as PatchTSMixer uses internal
+    temp paths that differ from tmp_path. Tests are marked as skip until
+    the internal path handling is fixed.
     """
     mlruns_dir = os.path.join(tmp_path, "mlruns")
     os.makedirs(mlruns_dir, exist_ok=True)

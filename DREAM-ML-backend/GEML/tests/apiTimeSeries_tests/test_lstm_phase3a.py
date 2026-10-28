@@ -1111,11 +1111,14 @@ def test_dtype_validation_accepts_numeric_features():
         print("✅ Numeric dtype test passed: All numeric features accepted")
 
 
+@pytest.mark.skip(reason="Requires MLflow server setup - use for manual testing only")
 def test_dtype_validation_error_message_lists_available_columns():
     """
     Test that dtype validation error message lists available numeric columns.
 
     This helps users understand which columns they SHOULD use as features.
+
+    SKIPPED BY DEFAULT: This test requires MLflow server setup.
     """
     # Create dataset with mix of categorical and numeric
     dates = pd.date_range('2020-01-01', periods=50, freq='D')

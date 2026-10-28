@@ -334,7 +334,7 @@ class TestTrainModelLogic:
         del data["algorithm"]
 
         # Act & Assert
-        with pytest.raises(ValueError, match="Algoritmo no soportado. Use: logistic, mlp, xgboost, arima"):
+        with pytest.raises(ValueError, match="Algoritmo no soportado. Use: xgboost, arima, lstm, patchtsmixer"):
             self.service.train_model_logic(self.mock_dataset_file, data)
 
     @patch('os.path.exists')
