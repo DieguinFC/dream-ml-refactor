@@ -1,0 +1,800 @@
+# Plan para resolver los tests fallidos
+
+El problema actual está concentrado en **dos causas principales**:
+
+1. Falta `context_length` en la configuración de PatchTSMixer.
+2. La vista `train_model` valida el CSV antes de validar configuración/directorio y provoca 10 fallos en cascada.
+
+El test que se bloqueaba durante 30 minutos ya fue corregido y ahora pasa.
+
+---
+
+# 1. `test_pipeline_config_model_params_complete`
+
+### Nombre
+
+```text
+tests/apiTimeSeries_tests/test_patchtsmixer_full_pipeline.py::TestPipelineConfigSchema::test_pipeline_config_model_params_complete
+```
+
+Archivo:
+
+`test_patchtsmixer_full_pipeline.py`
+
+### Problema
+
+El test espera que `model_params` contenga:
+
+```python
+"context_length"
+```
+
+Pero el pipeline genera un diccionario parecido a:
+
+```python
+{
+    "channel_attention": False,
+    "d_model": 16,
+    "dropout": 0.2,
+    "expansion_factor": 2,
+    ...
+}
+```
+
+sin incluir `context_length`.
+
+El error exacto es:
+
+```text
+AssertionError: Missing model_params key: context_length
+```
+
+## Qué revisar
+
+Buscar dónde se crea el diccionario `model_params`:
+
+```bash
+cd /workspaces/dream-ml-refactor
+
+rg -n "model_params|context_length|pipeline_config" \
+  DREAM-ML-backend/GEML/apiTimeSeries \
+  DREAM-ML-backend/GEML/tests/apiTimeSeries_tests
+```
+
+Los archivos más importantes son:
+
+- `train.py`
+- `services.py`
+- `test_patchtsmixer_full_pipeline.py`
+
+## Solución recomendada
+
+Agregar `context_length` al diccionario que se guarda en la configuración del modelo.
+
+Por ejemplo:
+
+```python
+model_params = {
+    "context_length": context_length,
+    "prediction_length": prediction_length,
+    "d_model": d_model,
+    "num_layers": num_layers,
+    "dropout": dropout,
+    "expansion_factor": expansion_factor,
+    "channel_attention": channel_attention,
+}
+```
+
+El valor debe salir de la configuración real usada para entrenar el modelo. No conviene poner un valor fijo únicamente para satisfacer el test.
+
+### Importante
+
+Hay que distinguir entre:
+
+- `context_length`: cantidad de pasos históricos utilizados como entrada.
+- `prediction_length`: cantidad de pasos futuros predichos.
+
+El valor debe ser el mismo que se utiliza para preparar los datos y configurar PatchTSMixer.
+
+## Paso a paso
+
+### Paso 1: identificar el origen del valor
+
+Revisar las funciones de entrenamiento y configuración:
+
+```bash
+rg -n "context_length|prediction_length|model_params" \
+  DREAM-ML-backend/GEML/apiTimeSeries/train.py
+```
+
+### Paso 2: agregarlo al resultado/configuración
+
+Incluirlo en:
+
+- El diccionario `model_params`.
+- El `pipeline_config`, si existe una sección separada para parámetros del modelo.
+- Cualquier serialización JSON utilizada posteriormente.
+
+### Paso 3: ejecutar el test aislado
+
+```bash
+cd /workspaces/dream-ml-refactor/DREAM-ML-backend/GEML
+
+python -m pytest \
+  tests/apiTimeSeries_tests/test_patchtsmixer_full_pipeline.py::TestPipelineConfigSchema::test_pipeline_config_model_params_complete \
+  -q \
+  --tb=short \
+  --timeout=60
+```
+
+### Resultado esperado
+
+```text
+1 passed
+```
+
+### Paso 4: ejecutar todo el archivo
+
+```bash
+python -m pytest \
+  tests/apiTimeSeries_tests/test_patchtsmixer_full_pipeline.py \
+  -q \
+  --tb=short \
+  --timeout=300
+```
+
+Esto confirma que agregar `context_length` no rompe otros tests del pipeline.
+
+---
+
+# 2. `test_missing_configuration_data_returns_400`
+
+### Nombre
+
+```text
+TestTrainModelView::test_missing_configuration_data_returns_400
+```
+
+Archivo:
+
+`test_views_train_model.py`
+
+### Problema
+
+El test espera:
+
+```text
+Datos de configuración faltantes
+```
+
+pero la vista responde primero:
+
+```text
+No se encontró archivo CSV en la solicitud
+```
+
+La validación actual ocurre en:
+
+`views.py`
+
+### Causa
+
+La vista está validando el CSV antes de validar la configuración. Por eso el error específico del test nunca se alcanza.
+
+## Solución recomendada
+
+Reordenar las validaciones de la vista.
+
+Orden recomendado:
+
+1. Validar método HTTP.
+2. Validar que exista la configuración.
+3. Validar que `experiment_dir` exista y sea válido.
+4. Validar que exista el CSV.
+5. Ejecutar el servicio de entrenamiento.
+
+La vista debería comportarse conceptualmente así:
+
+```python
+if not configuration_data:
+    return JsonResponse(
+        {
+            "status": "error",
+            "message": "Error en parámetros de entrada",
+            "error_details": "Datos de configuración faltantes",
+        },
+        status=400,
+    )
+
+if not experiment_dir or not os.path.isdir(experiment_dir):
+    return JsonResponse(
+        {
+            "status": "error",
+            "message": "Directorio de experimento no encontrado",
+        },
+        status=404,
+    )
+
+if "csv_file" not in request.FILES:
+    return JsonResponse(
+        {
+            "status": "error",
+            "message": "Error en parámetros de entrada",
+            "error_details": "No se encontró archivo CSV en la solicitud",
+        },
+        status=400,
+    )
+```
+
+Los nombres concretos deben adaptarse a los nombres ya utilizados por la vista.
+
+## Paso a paso
+
+### Paso 1: revisar los datos que usan los tests
+
+```bash
+sed -n '1,220p' \
+  DREAM-ML-backend/GEML/tests/apiTimeSeries_tests/test_views_train_model.py
+```
+
+Identificar:
+
+- Cómo envían la configuración.
+- Cómo envían el archivo.
+- Qué nombres esperan para los campos.
+- Qué mocks utilizan.
+
+### Paso 2: revisar la vista completa
+
+```bash
+sed -n '330,470p' \
+  DREAM-ML-backend/GEML/apiTimeSeries/views.py
+```
+
+### Paso 3: reordenar las validaciones
+
+No hay que modificar el mensaje del test para ocultar el problema. La vista debe evaluar primero la condición que el request realmente está probando.
+
+### Paso 4: ejecutar el test aislado
+
+```bash
+python -m pytest \
+  tests/apiTimeSeries_tests/test_views_train_model.py::TestTrainModelView::test_missing_configuration_data_returns_400 \
+  -q \
+  --tb=short \
+  --timeout=60
+```
+
+### Resultado esperado
+
+```text
+1 passed
+```
+
+---
+
+# 3. Tests de directorio de experimento
+
+Estos tres tests tienen la misma causa.
+
+## Tests
+
+```text
+TestTrainModelView::test_missing_experiment_directory_returns_404
+TestTrainModelView::test_invalid_experiment_directory_path_returns_404
+TestTrainModelView::test_empty_experiment_directory_string_returns_404
+```
+
+Archivo:
+
+`test_views_train_model.py`
+
+## Problema
+
+Los tests esperan:
+
+```text
+404
+```
+
+pero reciben:
+
+```text
+400
+```
+
+porque la vista intenta validar el CSV antes de validar el directorio.
+
+## Solución
+
+Después de validar la configuración, validar inmediatamente `experiment_dir`:
+
+```python
+if not experiment_dir or not os.path.isdir(experiment_dir):
+    return JsonResponse(
+        {
+            "status": "error",
+            "message": "Directorio de experimento no encontrado",
+            "error_details": experiment_dir,
+        },
+        status=404,
+    )
+```
+
+### Casos que debe cubrir
+
+| Entrada | Respuesta esperada |
+|---|---:|
+| Campo `experiment_dir` ausente | 404 |
+| Ruta inexistente | 404 |
+| Cadena vacía | 404 |
+| Ruta válida | Continúa hacia validación del CSV |
+
+## Validación
+
+Ejecutar los tres juntos:
+
+```bash
+python -m pytest \
+  tests/apiTimeSeries_tests/test_views_train_model.py \
+  -k "experiment_directory" \
+  -q \
+  --tb=short \
+  --timeout=60
+```
+
+Resultado esperado:
+
+```text
+3 passed
+```
+
+---
+
+# 4. `test_active_mlflow_run_cleanup`
+
+### Nombre
+
+```text
+TestTrainModelView::test_active_mlflow_run_cleanup
+```
+
+### Problema
+
+El test espera:
+
+```python
+mlflow.end_run.assert_called_once()
+```
+
+pero `end_run()` no se llama.
+
+La razón inmediata es que la vista termina antes con:
+
+```text
+No se encontró archivo CSV en la solicitud
+```
+
+Por lo tanto nunca entra en la parte que limpia el run activo.
+
+## Solución recomendada
+
+Primero corregir el orden de validación de la vista. Después garantizar que la limpieza de MLflow esté en un bloque `finally`.
+
+Patrón recomendado:
+
+```python
+try:
+    result = service.train_model_logic(csv_file, configuration_data)
+    return JsonResponse(result, status=200)
+except FileNotFoundError as exc:
+    return JsonResponse(..., status=404)
+except RuntimeError as exc:
+    return JsonResponse(..., status=500)
+except Exception as exc:
+    logger.exception("Error inesperado durante el entrenamiento")
+    return JsonResponse(..., status=500)
+finally:
+    if mlflow.active_run() is not None:
+        mlflow.end_run()
+```
+
+Es importante que la limpieza ocurra tanto si:
+
+- El servicio termina correctamente.
+- Lanza `RuntimeError`.
+- Lanza `FileNotFoundError`.
+- Lanza una excepción inesperada.
+
+## Validación
+
+```bash
+python -m pytest \
+  tests/apiTimeSeries_tests/test_views_train_model.py \
+  -k "active_mlflow_run_cleanup" \
+  -q \
+  --tb=short \
+  --timeout=60
+```
+
+Resultado esperado:
+
+```text
+1 passed
+```
+
+---
+
+# 5. Tests de entrenamiento exitoso
+
+## Tests
+
+```text
+TestTrainModelView::test_successful_model_training_default_url
+TestTrainModelView::test_successful_model_training_custom_url
+```
+
+## Problema
+
+Ambos esperan:
+
+```text
+200
+```
+
+pero la vista devuelve:
+
+```text
+400
+```
+
+porque falla previamente con:
+
+```text
+No se encontró archivo CSV en la solicitud
+```
+
+## Solución
+
+No hay que cambiar la respuesta esperada a `400`. Estos tests representan una solicitud válida, así que hay que verificar:
+
+1. Que el test envía el archivo con el mismo nombre que busca la vista.
+2. Que la vista usa el campo correcto de `request.FILES`.
+3. Que las validaciones no rechazan la solicitud válida.
+4. Que el mock de `train_model_logic` esté aplicado al símbolo correcto.
+5. Que el resultado del servicio se convierta en `JsonResponse` con estado `200`.
+
+Revisar los nombres de los campos:
+
+```bash
+rg -n "FILES|csv|dataset|configuration|experiment_dir" \
+  DREAM-ML-backend/GEML/apiTimeSeries/views.py \
+  DREAM-ML-backend/GEML/tests/apiTimeSeries_tests/test_views_train_model.py
+```
+
+Si el test envía, por ejemplo:
+
+```python
+files={"file": csv_file}
+```
+
+pero la vista busca:
+
+```python
+request.FILES.get("csv_file")
+```
+
+debe corregirse uno de los dos para que exista un contrato único.
+
+## Validación
+
+```bash
+python -m pytest \
+  tests/apiTimeSeries_tests/test_views_train_model.py \
+  -k "successful_model_training" \
+  -q \
+  --tb=short \
+  --timeout=60
+```
+
+Resultado esperado:
+
+```text
+2 passed
+```
+
+---
+
+# 6. `test_training_service_runtime_error_returns_500`
+
+### Problema
+
+El test espera que un `RuntimeError` producido por el servicio llegue como:
+
+```text
+500
+```
+
+pero actualmente recibe:
+
+```text
+400
+```
+
+porque el servicio ni siquiera llega a ejecutarse: la vista falla antes al validar el CSV.
+
+## Solución
+
+Después de corregir las validaciones iniciales, comprobar que el manejo de excepciones tenga una rama específica:
+
+```python
+except RuntimeError as exc:
+    logger.error("Error durante el entrenamiento: %s", exc, exc_info=True)
+    return JsonResponse(
+        {
+            "status": "error",
+            "message": "Error durante el entrenamiento",
+            "error_details": str(exc),
+        },
+        status=500,
+    )
+```
+
+No se debe convertir todo error en `400`. Un `400` indica una solicitud inválida del cliente; un `RuntimeError` del servicio normalmente es un error interno del servidor.
+
+## Validación
+
+```bash
+python -m pytest \
+  tests/apiTimeSeries_tests/test_views_train_model.py \
+  -k "runtime_error_returns_500" \
+  -q \
+  --tb=short \
+  --timeout=60
+```
+
+Resultado esperado:
+
+```text
+1 passed
+```
+
+---
+
+# 7. `test_training_service_file_not_found_error_returns_404`
+
+### Problema
+
+El test espera:
+
+```text
+404
+```
+
+pero recibe:
+
+```text
+400
+```
+
+Otra vez, la vista no alcanza el `FileNotFoundError` del servicio porque falla antes durante la validación del CSV.
+
+## Solución
+
+Después de que la solicitud llegue al servicio, manejar `FileNotFoundError` explícitamente:
+
+```python
+except FileNotFoundError as exc:
+    logger.warning("Archivo o directorio no encontrado: %s", exc)
+    return JsonResponse(
+        {
+            "status": "error",
+            "message": "Archivo o directorio no encontrado",
+            "error_details": str(exc),
+        },
+        status=404,
+    )
+```
+
+## Validación
+
+```bash
+python -m pytest \
+  tests/apiTimeSeries_tests/test_views_train_model.py \
+  -k "file_not_found_error_returns_404" \
+  -q \
+  --tb=short \
+  --timeout=60
+```
+
+Resultado esperado:
+
+```text
+1 passed
+```
+
+---
+
+# 8. `test_unexpected_exception_with_active_mlflow_run_cleanup`
+
+### Problema
+
+El test espera:
+
+```text
+500
+```
+
+y que además se ejecute:
+
+```python
+mlflow.end_run()
+```
+
+Actualmente recibe `400` y `end_run()` no se llama porque la vista termina antes con el error del CSV.
+
+## Solución
+
+Usar una estructura de manejo que separe:
+
+- Validación del request.
+- Ejecución del servicio.
+- Limpieza de MLflow.
+
+Ejemplo:
+
+```python
+try:
+    result = train_model_logic(csv_file, configuration_data)
+    return JsonResponse(result, status=200)
+except FileNotFoundError as exc:
+    return JsonResponse(..., status=404)
+except RuntimeError as exc:
+    return JsonResponse(..., status=500)
+except Exception as exc:
+    logger.exception("Error inesperado durante train_model")
+    return JsonResponse(..., status=500)
+finally:
+    if mlflow.active_run() is not None:
+        mlflow.end_run()
+```
+
+## Validación
+
+```bash
+python -m pytest \
+  tests/apiTimeSeries_tests/test_views_train_model.py \
+  -k "unexpected_exception_with_active_mlflow_run_cleanup" \
+  -q \
+  --tb=short \
+  --timeout=60
+```
+
+Resultado esperado:
+
+```text
+1 passed
+```
+
+---
+
+# Orden de implementación recomendado
+
+## Fase 1: corregir el contrato de la vista
+
+Modificar `views.py`:
+
+1. Validar configuración.
+2. Validar `experiment_dir`.
+3. Validar CSV.
+4. Ejecutar servicio.
+5. Manejar excepciones específicas.
+6. Ejecutar limpieza MLflow en `finally`.
+
+Después ejecutar:
+
+```bash
+cd /workspaces/dream-ml-refactor/DREAM-ML-backend/GEML
+
+python -m pytest \
+  tests/apiTimeSeries_tests/test_views_train_model.py \
+  -q \
+  --tb=short \
+  --timeout=60
+```
+
+Objetivo:
+
+```text
+14 passed
+```
+
+Actualmente el archivo tiene:
+
+```text
+10 failed, 4 passed
+```
+
+---
+
+## Fase 2: corregir `context_length`
+
+Modificar la generación de configuración en:
+
+- `train.py`
+- `services.py`
+
+Agregar `context_length` usando el valor real del entrenamiento.
+
+Después ejecutar:
+
+```bash
+python -m pytest \
+  tests/apiTimeSeries_tests/test_patchtsmixer_full_pipeline.py \
+  -q \
+  --tb=short \
+  --timeout=300
+```
+
+Objetivo:
+
+```text
+18 passed
+```
+
+---
+
+## Fase 3: ejecutar los tests ya corregidos
+
+```bash
+python -m pytest \
+  tests/apiTimeSeries_tests/test_services_train_model_logic.py \
+  -q \
+  --tb=short \
+  --timeout=60
+```
+
+Objetivo actual:
+
+```text
+11 passed
+```
+
+---
+
+## Fase 4: ejecutar todos los tests con corte temprano
+
+```bash
+python -m pytest \
+  tests/api_tests \
+  tests/apiTimeSeries_tests \
+  -ra \
+  -v \
+  --maxfail=1 \
+  --tb=short \
+  --durations=30 \
+  --timeout=300 \
+  --timeout-method=signal
+```
+
+Para desarrollo local recomiendo `--timeout=300`, no `1800`. El timeout de 1800 segundos debe quedar reservado para CI si realmente existe un test que necesite tanto tiempo.
+
+---
+
+# Resultado esperado al terminar
+
+La suite debería pasar de:
+
+```text
+12 failed, 537 passed, 36 skipped
+```
+
+a:
+
+```text
+0 failed
+```
+
+manteniendo los tests omitidos documentados.
+
+Los warnings de MLflow, `imghdr`, Matplotlib y Requests no son fallos de tests. Se pueden tratar después como una tarea separada de actualización de dependencias.

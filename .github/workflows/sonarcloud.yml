@@ -55,6 +55,7 @@ jobs:
               tests/apiTimeSeries_tests \
               -ra \
               -v \
+              --maxfail=1 \
               --tb=short \
               --durations=30 \
               --timeout=1800 \

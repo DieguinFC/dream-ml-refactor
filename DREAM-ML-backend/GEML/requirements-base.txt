@@ -2,6 +2,10 @@
 # Python 3.11+
 # All versions locked to match production environment (Python 3.11.14)
 
+# MLflow 2.13.2 still imports pkg_resources, which was removed from newer
+# setuptools releases.
+setuptools==79.0.1
+
 # Web Framework & ASGI
 asgiref==3.7.2
 Django==4.2.7

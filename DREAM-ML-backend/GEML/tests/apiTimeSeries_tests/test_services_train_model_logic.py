@@ -344,6 +344,8 @@ class TestTrainModelLogic:
     @patch('mlflow.get_experiment_by_name')
     @patch('apiTimeSeries.services.start_run')
     @patch('mlflow.log_param')
+    @patch('mlflow.log_metrics')
+    @patch('mlflow.set_tag')
     @patch('mlflow.log_input')
     @patch('mlflow.data.from_pandas')
     @patch('subprocess.run')
@@ -352,8 +354,9 @@ class TestTrainModelLogic:
     @patch('apiTimeSeries.services.train_arima_model')
     def test_train_model_logic_success_without_model_path(self, mock_train_arima, mock_file_open, mock_read_csv,
                                                          mock_subprocess, mock_from_pandas, mock_log_input,
-                                                         mock_log_param, mock_start_run, mock_get_experiment,
-                                                         mock_set_tracking, mock_makedirs, mock_getsize, mock_exists):
+                                                         mock_set_tag, mock_log_metrics, mock_log_param,
+                                                         mock_start_run, mock_get_experiment, mock_set_tracking,
+                                                         mock_makedirs, mock_getsize, mock_exists):
         """
         Given a valid request
         When train_model_logic executes successfully but returns result without model_path
