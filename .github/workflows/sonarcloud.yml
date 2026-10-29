@@ -54,7 +54,8 @@ jobs:
               tests/api_tests \
               tests/apiTimeSeries_tests \
               -ra \
-              -vv \
+              -v \
+              --tb=short \
               --durations=30 \
               --timeout=1800 \
               --timeout-method=signal \
