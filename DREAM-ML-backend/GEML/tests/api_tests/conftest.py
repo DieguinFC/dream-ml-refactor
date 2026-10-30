@@ -1,7 +1,11 @@
 """api_tests specific fixtures."""
 import pytest
+import logging
 from unittest.mock import MagicMock, patch
 from django.test import RequestFactory
+
+# Suppress CodeCarbon logging errors about closed file handles
+logging.getLogger('codecarbon').setLevel(logging.CRITICAL + 1)
 
 
 @pytest.fixture(scope="function")

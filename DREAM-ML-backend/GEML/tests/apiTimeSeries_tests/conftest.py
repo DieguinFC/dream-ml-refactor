@@ -2,6 +2,10 @@
 import pytest
 import pandas as pd
 import numpy as np
+import logging
+
+# Suppress CodeCarbon logging errors about closed file handles
+logging.getLogger('codecarbon').setLevel(logging.CRITICAL + 1)
 
 
 @pytest.fixture(scope="session")
