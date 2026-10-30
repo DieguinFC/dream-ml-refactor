@@ -3,12 +3,16 @@ import pytest
 import pandas as pd
 import numpy as np
 import logging
+import os
 from unittest.mock import MagicMock, patch
 
 # Suppress CodeCarbon logging errors about closed file handles
 logging.getLogger('codecarbon').setLevel(logging.CRITICAL + 1)
 # Add NullHandler to completely suppress logging output
 logging.getLogger('codecarbon').addHandler(logging.NullHandler())
+
+# Set MLflow tracking URI to a non-existent path to prevent DB initialization
+os.environ['MLFLOW_TRACKING_URI'] = 'file:///dev/null'
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -26,6 +30,25 @@ def disable_codecarbon_globally():
         mock_instance.stop.return_value = None
         mock_tracker.return_value = mock_instance
         yield
+
+
+@pytest.fixture(scope="session", autouse=True)
+def teardown_mlflow():
+    """Teardown MLflow to prevent database initialization after tests.
+
+    This fixture runs at the end of the test session to prevent MLflow
+    from attempting to initialize its SQLite database, which causes
+    timeouts and retry loops in CI environments.
+    """
+    yield
+    # Teardown: clear MLflow tracking URI and close any connections
+    try:
+        import mlflow
+        mlflow.end_run()
+    except Exception:
+        pass
+    # Clear environment variable to prevent further MLflow activity
+    os.environ.pop('MLFLOW_TRACKING_URI', None)
 
 
 @pytest.fixture(scope="session")
