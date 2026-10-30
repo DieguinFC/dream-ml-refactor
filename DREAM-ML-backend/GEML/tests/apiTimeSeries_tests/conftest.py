@@ -4,6 +4,8 @@ import pandas as pd
 import numpy as np
 import logging
 import os
+import tempfile
+import shutil
 from unittest.mock import MagicMock, patch
 
 # Suppress CodeCarbon logging errors about closed file handles
@@ -11,8 +13,10 @@ logging.getLogger('codecarbon').setLevel(logging.CRITICAL + 1)
 # Add NullHandler to completely suppress logging output
 logging.getLogger('codecarbon').addHandler(logging.NullHandler())
 
-# Set MLflow tracking URI to a non-existent path to prevent DB initialization
-os.environ['MLFLOW_TRACKING_URI'] = 'file:///dev/null'
+# Create temporary directory for MLflow tracking to prevent DB initialization
+# and allow Optuna to create its .trash directory
+_mlflow_temp_dir = tempfile.mkdtemp()
+os.environ['MLFLOW_TRACKING_URI'] = f'file://{_mlflow_temp_dir}'
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -38,7 +42,8 @@ def teardown_mlflow():
 
     This fixture runs at the end of the test session to prevent MLflow
     from attempting to initialize its SQLite database, which causes
-    timeouts and retry loops in CI environments.
+    timeouts and retry loops in CI environments. Also cleans up the
+    temporary directory used for MLflow tracking.
     """
     yield
     # Teardown: clear MLflow tracking URI and close any connections
@@ -49,6 +54,11 @@ def teardown_mlflow():
         pass
     # Clear environment variable to prevent further MLflow activity
     os.environ.pop('MLFLOW_TRACKING_URI', None)
+    # Clean up temporary directory
+    try:
+        shutil.rmtree(_mlflow_temp_dir, ignore_errors=True)
+    except Exception:
+        pass
 
 
 @pytest.fixture(scope="session")
