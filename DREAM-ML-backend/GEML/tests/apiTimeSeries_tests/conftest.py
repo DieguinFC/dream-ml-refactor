@@ -3,9 +3,29 @@ import pytest
 import pandas as pd
 import numpy as np
 import logging
+from unittest.mock import MagicMock, patch
 
 # Suppress CodeCarbon logging errors about closed file handles
 logging.getLogger('codecarbon').setLevel(logging.CRITICAL + 1)
+# Add NullHandler to completely suppress logging output
+logging.getLogger('codecarbon').addHandler(logging.NullHandler())
+
+
+@pytest.fixture(scope="session", autouse=True)
+def disable_codecarbon_globally():
+    """Disable CodeCarbon globally for all tests to prevent I/O errors.
+
+    This fixture runs automatically for all tests and patches CodeCarbon
+    to prevent instantiation, which eliminates the logging errors about
+    closed file handles from background threads.
+    """
+    with patch('codecarbon.EmissionsTracker', MagicMock) as mock_tracker:
+        # Configure the mock to return a mock tracker that does nothing
+        mock_instance = MagicMock()
+        mock_instance.start.return_value = None
+        mock_instance.stop.return_value = None
+        mock_tracker.return_value = mock_instance
+        yield
 
 
 @pytest.fixture(scope="session")
