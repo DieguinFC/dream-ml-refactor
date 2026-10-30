@@ -37,6 +37,36 @@ def disable_codecarbon_globally():
 
 
 @pytest.fixture(scope="session", autouse=True)
+def patch_optuna_storage():
+    """Patch Optuna to use InMemoryStorage instead of MLflow integration.
+
+    This prevents Optuna from attempting to use MLflow for logging, which
+    causes failures when MLflow experiment doesn't exist. InMemoryStorage
+    is faster and more appropriate for unit tests.
+    """
+    try:
+        import optuna
+        original_create_study = optuna.study.create_study
+        
+        def patched_create_study(*args, **kwargs):
+            # Force InMemoryStorage regardless of what the test passes
+            kwargs['storage'] = optuna.storages.InMemoryStorage()
+            return original_create_study(*args, **kwargs)
+        
+        optuna.study.create_study = patched_create_study
+        yield
+    except ImportError:
+        # Optuna not available, skip patching
+        yield
+    finally:
+        try:
+            import optuna
+            optuna.study.create_study = original_create_study
+        except (ImportError, NameError):
+            pass
+
+
+@pytest.fixture(scope="session", autouse=True)
 def teardown_mlflow():
     """Teardown MLflow to prevent database initialization after tests.
 
