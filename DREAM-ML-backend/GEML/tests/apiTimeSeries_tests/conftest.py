@@ -4,8 +4,6 @@ import pandas as pd
 import numpy as np
 import logging
 import os
-import tempfile
-import shutil
 from unittest.mock import MagicMock, patch
 
 # Suppress CodeCarbon logging errors about closed file handles
@@ -13,10 +11,9 @@ logging.getLogger('codecarbon').setLevel(logging.CRITICAL + 1)
 # Add NullHandler to completely suppress logging output
 logging.getLogger('codecarbon').addHandler(logging.NullHandler())
 
-# Create temporary directory for MLflow tracking to prevent DB initialization
-# and allow Optuna to create its .trash directory
-_mlflow_temp_dir = tempfile.mkdtemp()
-os.environ['MLFLOW_TRACKING_URI'] = f'file://{_mlflow_temp_dir}'
+# Do NOT set MLFLOW_TRACKING_URI to prevent Optuna from auto-integrating with MLflow
+# Optuna automatically detects MLFLOW_TRACKING_URI and tries to use MLflow for logging
+# which causes failures in tests
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -37,43 +34,12 @@ def disable_codecarbon_globally():
 
 
 @pytest.fixture(scope="session", autouse=True)
-def patch_optuna_storage():
-    """Patch Optuna to use InMemoryStorage instead of MLflow integration.
-
-    This prevents Optuna from attempting to use MLflow for logging, which
-    causes failures when MLflow experiment doesn't exist. InMemoryStorage
-    is faster and more appropriate for unit tests.
-    """
-    try:
-        import optuna
-        original_create_study = optuna.study.create_study
-        
-        def patched_create_study(*args, **kwargs):
-            # Force InMemoryStorage regardless of what the test passes
-            kwargs['storage'] = optuna.storages.InMemoryStorage()
-            return original_create_study(*args, **kwargs)
-        
-        optuna.study.create_study = patched_create_study
-        yield
-    except ImportError:
-        # Optuna not available, skip patching
-        yield
-    finally:
-        try:
-            import optuna
-            optuna.study.create_study = original_create_study
-        except (ImportError, NameError):
-            pass
-
-
-@pytest.fixture(scope="session", autouse=True)
 def teardown_mlflow():
     """Teardown MLflow to prevent database initialization after tests.
 
     This fixture runs at the end of the test session to prevent MLflow
     from attempting to initialize its SQLite database, which causes
-    timeouts and retry loops in CI environments. Also cleans up the
-    temporary directory used for MLflow tracking.
+    timeouts and retry loops in CI environments.
     """
     yield
     # Teardown: clear MLflow tracking URI and close any connections
@@ -84,11 +50,6 @@ def teardown_mlflow():
         pass
     # Clear environment variable to prevent further MLflow activity
     os.environ.pop('MLFLOW_TRACKING_URI', None)
-    # Clean up temporary directory
-    try:
-        shutil.rmtree(_mlflow_temp_dir, ignore_errors=True)
-    except Exception:
-        pass
 
 
 @pytest.fixture(scope="session")
