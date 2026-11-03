@@ -28,10 +28,10 @@ class TestUploadAndCleanCSV:
     
     def teardown_method(self):
         """Clean up after each test method."""
-        # Clean up temp directory
+        # Clean up temp directory with ignore_errors to avoid hanging
         import shutil
         if os.path.exists(self.temp_dir):
-            shutil.rmtree(self.temp_dir)
+            shutil.rmtree(self.temp_dir, ignore_errors=True)
     
     def create_csv_file(self, filename="test.csv", content=None, size_mb=None):
         """Helper method to create mock CSV files."""
