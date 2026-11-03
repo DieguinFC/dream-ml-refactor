@@ -11,46 +11,52 @@ permissions:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
       matrix:
         python-version: [3.11]
-    if: github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip ci]')  # 👈 skip commit
+
     steps:
     - uses: actions/checkout@v4
+
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+
     - name: Install Dependencies
       run: |
-        pwd
-        ls -al
         cd ./DREAM-ML-backend/GEML/
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-      
-    - name: Run Tests with Coverage
+        pip install -r requirements-base.txt
+        pip install -r requirements-dev.txt
+
+    - name: Run Django Migrations
+      env:
+        DJANGO_SETTINGS_MODULE: geml.settings
+        DATABASE_URL: sqlite:///db.sqlite3
       run: |
-        pwd
-        ls -al
         cd ./DREAM-ML-backend/GEML/
-        # Run pytest with coverage - this will fail if tests fail
+        python manage.py migrate --no-input
+
+    - name: Run Tests with Coverage
+      env:
+        DJANGO_SETTINGS_MODULE: geml.settings
+        DATABASE_URL: sqlite:///db.sqlite3
+      run: |
+        cd ./DREAM-ML-backend/GEML/
         coverage run --source='.' -m pytest
-        # Generate coverage report
         coverage report
         coverage html
-        
+
     - name: Check Coverage Threshold
       run: |
         cd ./DREAM-ML-backend/GEML/
-        # Check if coverage is at least 75%
         coverage report --fail-under=75
-        
+
     - name: Upload htmlcov report
-      # Only upload if previous steps succeeded
       if: success()
       uses: actions/upload-artifact@v4
       with:
