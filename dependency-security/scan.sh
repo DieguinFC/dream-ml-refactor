@@ -10,11 +10,13 @@ set -euo pipefail
 #  - OWASP Dependency-Check (3rd-party vulnerabilities)
 #  - Trivy (container image vulnerabilities)
 #
-# Enforcement:
-#  - FAIL on CRITICAL vulnerabilities in:
-#      * Backend Python dependencies
-#      * Backend container image
-#  - WARN only elsewhere
+# Enforcement (native tool-level blocking):
+#  - OWASP Dependency-Check Backend: FAIL on CVSS >= 9.0 (CRITICAL)
+#  - Trivy Backend: FAIL on CRITICAL severity (exit-code 1)
+#  - Frontend scans: Report only (no blocking)
+#
+# Environment Variables:
+#  - NVD_API_KEY: Optional NVD API key for faster Dependency-Check scans
 ###############################################################################
 
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -31,8 +33,6 @@ FRONTEND_DIR="$ROOT_DIR/../DREAM-ML-frontend/frontend"
 
 LOG_FILE="$RUN_DIR/execution.log"
 SUMMARY_FILE="$RUN_DIR/summary.txt"
-
-NVD_API_KEY="e92c2c16-e1c3-4450-8682-f41a6423245a"
 
 mkdir -p \
   "$RUN_DIR/pip" \
@@ -118,6 +118,7 @@ if docker run --rm \
   --scan /src/DREAM-ML-backend/GEML/requirements-dev.txt \
   --format HTML --format JSON \
   --out /report/backend \
+  --failOnCVSS 9.0 \
   $NVD_ARG; then
   echo "  ✔ Backend scan completed"
 else
@@ -160,6 +161,7 @@ if docker run --rm \
   -v "$RUN_DIR/trivy:/output" \
   aquasec/trivy:latest image \
   --severity CRITICAL,HIGH,MEDIUM,LOW \
+  --exit-code 1 --severity CRITICAL \
   --format json \
   --output /output/backend.json \
   "$BACKEND_IMAGE"; then
@@ -276,12 +278,16 @@ FRONTEND_DC_HIGH=$(jq '[.dependencies[]?.vulnerabilities[]? | select(.severity==
 cat "$SUMMARY_FILE"
 
 ###############################################################################
-# Enforcement rule: FAIL only if backend has CRITICAL vulns
+# Enforcement Summary
+# Note: Native tool-level blocking is already in place:
+#  - OWASP DC Backend: --failOnCVSS 9.0 (CRITICAL)
+#  - Trivy Backend: --exit-code 1 --severity CRITICAL
 ###############################################################################
 
 if [[ "$BACKEND_DC_CRITICAL" -gt 0 || "$BACKEND_TRIVY_CRITICAL" -gt 0 ]]; then
   echo
   echo "❌ FAIL: CRITICAL vulnerabilities detected in enforced backend scope"
+  echo "Note: These should have been blocked by native tool policies"
   exit 1
 fi
 
