@@ -592,25 +592,24 @@ class TestUploadAndCleanCSV:
         response_data = json.loads(response.content)
         assert 'Archivo no encontrado:' in response_data['status']
     
-    # @pytest.mark.skip(reason="Test needs update after refactor - exceeds 30min timeout")
-    # @patch('apiTimeSeries.views.preProcessingService')
-    # @patch('os.path.isdir')
-    # def test_scenario_41_generic_exception_in_service(self, mock_isdir, mock_service):
-    #     """Test generic Exception in service layer returns 500."""
-    #     # Arrange
-    #     mock_isdir.return_value = True
-    #     mock_service.upload_and_clean_csv_logic.side_effect = Exception('Unexpected error')
-    #
-    #     csv_file = self.create_csv_file()
-    #     request = self.factory.post('/upload-and-clean-csv/', {
-    #         'experiment_dir': self.temp_dir,
-    #     })
-    #     request.FILES['file'] = csv_file
-    #
-    #     # Act
-    #     response = upload_and_clean_csv(request)
-    #
-    #     # Assert
-    #     assert response.status_code == 500
-    #     response_data = json.loads(response.content)
-    #     assert 'Error inesperado:' in response_data['status']
+    @patch('apiTimeSeries.views.preProcessingService')
+    @patch('os.path.isdir')
+    def test_scenario_41_generic_exception_in_service(self, mock_isdir, mock_service):
+        """Test generic Exception in service layer returns 500."""
+        # Arrange
+        mock_isdir.return_value = True
+        mock_service.upload_and_clean_csv_logic.side_effect = Exception('Unexpected error')
+        
+        csv_file = self.create_csv_file()
+        request = self.factory.post('/upload-and-clean-csv/', {
+            'experiment_dir': self.temp_dir,
+        })
+        request.FILES['file'] = csv_file
+        
+        # Act
+        response = upload_and_clean_csv(request)
+        
+        # Assert
+        assert response.status_code == 500
+        response_data = json.loads(response.content)
+        assert 'Error inesperado:' in response_data['status']

@@ -4,6 +4,8 @@ import pandas as pd
 import numpy as np
 import logging
 import os
+import tempfile
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 # Suppress CodeCarbon logging errors about closed file handles
@@ -42,10 +44,14 @@ def teardown_mlflow():
     timeouts and retry loops in CI environments.
     """
     yield
-    # Teardown: clear MLflow tracking URI and close any connections
+    # Teardown: end any leaked run against a throwaway store. The current tracking
+    # URI can point to a SQLite file in a deleted temp dir, and MLflow would retry
+    # that connection for about 55 minutes.
     try:
         import mlflow
-        mlflow.end_run()
+        with tempfile.TemporaryDirectory() as temp_store:
+            mlflow.set_tracking_uri(Path(temp_store).as_uri())
+            mlflow.end_run()
     except Exception:
         pass
     # Clear environment variable to prevent further MLflow activity

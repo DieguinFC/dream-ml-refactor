@@ -1,6 +1,5 @@
 import json
 import os
-import pytest
 from unittest.mock import Mock, patch, MagicMock
 from django.test import RequestFactory
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -67,7 +66,6 @@ class TestTrainModelView:
         assert response_data["status"] == "error"
         assert "No se encontró archivo CSV" in response_data["error_details"]
 
-    @pytest.mark.skip(reason="Test needs update after refactor - HTTP status code mismatch")
     def test_missing_configuration_data_returns_400(self):
         """
         Scenario 3: Missing configuration data
@@ -76,7 +74,7 @@ class TestTrainModelView:
         Then the response should return status 400 with error about missing configuration data
         """
         # Arrange
-        request = self.factory.post('/train_model/', data={}, files={'file': self.valid_file})
+        request = self.factory.post('/train_model/', data={'file': self.valid_file})
         
         # Act
         response = train_model(request)
@@ -97,8 +95,9 @@ class TestTrainModelView:
         """
         # Arrange
         request = self.factory.post('/train_model/', data={
-            'data': 'invalid json {'
-        }, files={'file': self.valid_file})
+            'data': 'invalid json {',
+            'file': self.valid_file,
+        })
         
         # Act
         response = train_model(request)
@@ -107,10 +106,8 @@ class TestTrainModelView:
         assert response.status_code == 400
         response_data = json.loads(response.content)
         assert response_data["status"] == "error"
-        # El mensaje real es "Error en parámetros de entrada" en lugar de "Formato JSON inválido"
-        assert response_data["message"] == "Error en parámetros de entrada"
+        assert response_data["message"] == "Formato JSON inválido en datos de configuración"
 
-    @pytest.mark.skip(reason="Test needs update after refactor - HTTP status code mismatch")
     @patch('apiTimeSeries.views.os.path.isdir')
     def test_missing_experiment_directory_returns_404(self, mock_isdir):
         """
@@ -123,8 +120,9 @@ class TestTrainModelView:
         mock_isdir.return_value = False
         data_without_exp_dir = {"algorithm": "logistic"}
         request = self.factory.post('/train_model/', data={
-            'data': json.dumps(data_without_exp_dir)
-        }, files={'file': self.valid_file}, format='multipart')
+            'data': json.dumps(data_without_exp_dir),
+            'file': self.valid_file,
+        })
         
         # Act
         response = train_model(request)
@@ -135,7 +133,6 @@ class TestTrainModelView:
         assert response_data["status"] == "error"
         assert "Directorio de experimento inválido" in response_data["error_details"]
 
-    @pytest.mark.skip(reason="Test needs update after refactor - HTTP status code mismatch")
     @patch('apiTimeSeries.views.os.path.isdir')
     def test_invalid_experiment_directory_path_returns_404(self, mock_isdir):
         """
@@ -147,8 +144,9 @@ class TestTrainModelView:
         # Arrange
         mock_isdir.return_value = False
         request = self.factory.post('/train_model/', data={
-            'data': json.dumps(self.valid_data)
-        }, files={'file': self.valid_file}, format='multipart')
+            'data': json.dumps(self.valid_data),
+            'file': self.valid_file,
+        })
         
         # Act
         response = train_model(request)
@@ -159,7 +157,6 @@ class TestTrainModelView:
         assert response_data["status"] == "error"
         assert "Directorio de experimento inválido" in response_data["error_details"]
 
-    @pytest.mark.skip(reason="Test needs update after refactor - HTTP status code mismatch")
     @patch('apiTimeSeries.views.os.path.isdir')
     def test_empty_experiment_directory_string_returns_404(self, mock_isdir):
         """
@@ -172,8 +169,9 @@ class TestTrainModelView:
         mock_isdir.return_value = False
         empty_dir_data = {"experiment_dir": "", "algorithm": "logistic"}
         request = self.factory.post('/train_model/', data={
-            'data': json.dumps(empty_dir_data)
-        }, files={'file': self.valid_file}, format='multipart')
+            'data': json.dumps(empty_dir_data),
+            'file': self.valid_file,
+        })
         
         # Act
         response = train_model(request)
@@ -184,12 +182,13 @@ class TestTrainModelView:
         assert response_data["status"] == "error"
         assert "Directorio de experimento inválido" in response_data["error_details"]
 
-    @pytest.mark.skip(reason="Test needs update after refactor - MLflow mock issue")
+    @patch('apiTimeSeries.views.trainModelService')
     @patch('apiTimeSeries.views.mlflow')
     @patch('apiTimeSeries.views.os.path.isdir')
     @patch('apiTimeSeries.views.os.path.dirname')
     @patch('apiTimeSeries.views.os.path.basename')
-    def test_active_mlflow_run_cleanup(self, mock_basename, mock_dirname, mock_isdir, mock_mlflow):
+    def test_active_mlflow_run_cleanup(self, mock_basename, mock_dirname, mock_isdir, mock_mlflow,
+                                       mock_service):
         """
         Scenario 8: Active MLflow run cleanup
         Given there is an active MLflow run before processing the request
@@ -200,27 +199,37 @@ class TestTrainModelView:
         mock_isdir.return_value = True
         mock_dirname.return_value = "/path/to"
         mock_basename.return_value = "experiment"
-        mock_mlflow.active_run.return_value = MagicMock()  # Simulate active run
-        mock_mlflow.get_experiment_by_name.return_value = None  # Will cause ValueError
-        
+        # Active before the request; ended by the view, so gone at the final check.
+        mock_mlflow.active_run.side_effect = [MagicMock(), None]
+        mock_experiment = MagicMock()
+        mock_experiment.experiment_id = "exp123"
+        mock_mlflow.get_experiment_by_name.return_value = mock_experiment
+
+        def train_after_cleanup(**kwargs):
+            mock_mlflow.end_run.assert_called_once()
+            return {"run_id": "run123"}
+
+        mock_service.train_model_logic.side_effect = train_after_cleanup
+
         request = self.factory.post('/train_model/', data={
-            'data': json.dumps(self.valid_data)
-        }, files={'file': self.valid_file}, format='multipart')
+            'data': json.dumps(self.valid_data),
+            'file': self.valid_file,
+        })
         
         # Act
         response = train_model(request)
         
         # Assert
-        mock_mlflow.end_run.assert_called_once()  # Verify cleanup was called
+        assert response.status_code == 200
+        mock_service.train_model_logic.assert_called_once()
+        mock_mlflow.end_run.assert_called_once()
 
-    @pytest.mark.skip(reason="Test needs update after refactor - HTTP status code mismatch")
     @patch('apiTimeSeries.views.trainModelService')
     @patch('apiTimeSeries.views.mlflow')
     @patch('apiTimeSeries.views.os.path.isdir')
     @patch('apiTimeSeries.views.os.path.dirname')
     @patch('apiTimeSeries.views.os.path.basename')
-    @patch('apiTimeSeries.views.os.environ.get')
-    def test_successful_model_training_default_url(self, mock_environ_get, mock_basename,
+    def test_successful_model_training_default_url(self, mock_basename,
                                                   mock_dirname, mock_isdir, mock_mlflow,
                                                   mock_service):
         """
@@ -233,7 +242,6 @@ class TestTrainModelView:
         mock_isdir.return_value = True
         mock_dirname.return_value = "/path/to"
         mock_basename.return_value = "experiment"
-        mock_environ_get.return_value = None  # MLFLOW_UI_URL not set
 
         mock_experiment = MagicMock()
         mock_experiment.experiment_id = "exp123"
@@ -247,19 +255,23 @@ class TestTrainModelView:
         }
 
         request = self.factory.post('/train_model/', data={
-            'data': json.dumps(self.valid_data)
-        }, files={'file': self.valid_file}, format='multipart')
+            'data': json.dumps(self.valid_data),
+            'file': self.valid_file,
+        })
 
         # Act
-        response = train_model(request)
+        with patch.dict(os.environ):
+            os.environ.pop("MLFLOW_UI_URL", None)
+            response = train_model(request)
 
         # Assert
         assert response.status_code == 200
         response_data = json.loads(response.content)
         assert response_data["status"] == "success"
-        assert "http://localhost:5000" in response_data["mlflow_ui"]
+        # The scheme is deliberately not asserted: the view currently builds
+        # "http://http://..." and that known bug should not be locked in here.
+        assert "localhost:5000/#/experiments/exp123/runs/run123" in response_data["mlflow_ui"]
 
-    @pytest.mark.skip(reason="Test needs update after refactor - HTTP status code mismatch")
     @patch('apiTimeSeries.views.trainModelService')
     @patch('apiTimeSeries.views.mlflow')
     @patch('apiTimeSeries.views.os.path.isdir')
@@ -294,8 +306,9 @@ class TestTrainModelView:
         }
 
         request = self.factory.post('/train_model/', data={
-            'data': json.dumps(self.valid_data)
-        }, files={'file': self.valid_file}, format='multipart')
+            'data': json.dumps(self.valid_data),
+            'file': self.valid_file,
+        })
 
         # Act
         response = train_model(request)
@@ -306,7 +319,6 @@ class TestTrainModelView:
         assert response_data["status"] == "success"
         assert custom_url in response_data["mlflow_ui"]
 
-    @pytest.mark.skip(reason="Test needs update after refactor - HTTP status code mismatch")
     @patch('apiTimeSeries.views.trainModelService')
     @patch('apiTimeSeries.views.mlflow')
     @patch('apiTimeSeries.views.os.path.isdir')
@@ -329,8 +341,9 @@ class TestTrainModelView:
         mock_service.train_model_logic.side_effect = RuntimeError("Training failed")
 
         request = self.factory.post('/train_model/', data={
-            'data': json.dumps(self.valid_data)
-        }, files={'file': self.valid_file}, format='multipart')
+            'data': json.dumps(self.valid_data),
+            'file': self.valid_file,
+        })
 
         # Act
         response = train_model(request)
@@ -363,8 +376,9 @@ class TestTrainModelView:
         mock_service.train_model_logic.side_effect = ValueError("Invalid parameter")
 
         request = self.factory.post('/train_model/', data={
-            'data': json.dumps(self.valid_data)
-        }, files={'file': self.valid_file}, format='multipart')
+            'data': json.dumps(self.valid_data),
+            'file': self.valid_file,
+        })
 
         # Act
         response = train_model(request)
@@ -374,8 +388,9 @@ class TestTrainModelView:
         response_data = json.loads(response.content)
         assert response_data["status"] == "error"
         assert response_data["message"] == "Error en parámetros de entrada"
+        assert response_data["error_details"] == "Invalid parameter"
+        mock_service.train_model_logic.assert_called_once()
 
-    @pytest.mark.skip(reason="Test needs update after refactor - HTTP status code mismatch")
     @patch('apiTimeSeries.views.trainModelService')
     @patch('apiTimeSeries.views.mlflow')
     @patch('apiTimeSeries.views.os.path.isdir')
@@ -398,8 +413,9 @@ class TestTrainModelView:
         mock_service.train_model_logic.side_effect = FileNotFoundError("File not found")
 
         request = self.factory.post('/train_model/', data={
-            'data': json.dumps(self.valid_data)
-        }, files={'file': self.valid_file}, format='multipart')
+            'data': json.dumps(self.valid_data),
+            'file': self.valid_file,
+        })
 
         # Act
         response = train_model(request)
@@ -410,7 +426,6 @@ class TestTrainModelView:
         assert response_data["status"] == "error"
         assert response_data["message"] == "Recurso no encontrado"
 
-    @pytest.mark.skip(reason="Test needs update after refactor - HTTP status code mismatch")
     @patch('apiTimeSeries.views.trainModelService')
     @patch('apiTimeSeries.views.mlflow')
     @patch('apiTimeSeries.views.os.path.isdir')
@@ -433,8 +448,9 @@ class TestTrainModelView:
         mock_service.train_model_logic.side_effect = Exception("Unexpected error")
 
         request = self.factory.post('/train_model/', data={
-            'data': json.dumps(self.valid_data)
-        }, files={'file': self.valid_file}, format='multipart')
+            'data': json.dumps(self.valid_data),
+            'file': self.valid_file,
+        })
 
         # Act
         response = train_model(request)
