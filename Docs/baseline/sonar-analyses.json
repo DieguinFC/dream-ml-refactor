@@ -1,0 +1,39 @@
+{
+  "analyses": [
+    {
+      "date": "2026-11-09T06:28:23+0000",
+      "events": [
+        {
+          "category": "VERSION",
+          "key": "AaG-_vjxpibNwSd--XOn",
+          "name": "baseline-pre-refactor"
+        }
+      ],
+      "key": "1fafebf1-7a10-4395-8eba-87b06d358eba",
+      "manualNewCodePeriodBaseline": false,
+      "projectVersion": "baseline-pre-refactor",
+      "revision": "94a725424985f642432d1dfe3591e55ca98a77a1"
+    },
+    {
+      "date": "2026-11-06T00:34:59+0000",
+      "events": [],
+      "key": "cb44493c-1351-40d5-ac21-9c6674e49106",
+      "manualNewCodePeriodBaseline": false,
+      "projectVersion": "baseline-pre-refactor",
+      "revision": "e02c0bbf34b5a8b34b2949facc7157f535667783"
+    },
+    {
+      "date": "2026-11-05T23:30:30+0000",
+      "events": [],
+      "key": "9e2f49db-668e-45c6-992b-10c1da42d50f",
+      "manualNewCodePeriodBaseline": false,
+      "projectVersion": "baseline-pre-refactor",
+      "revision": "ad278b6c20dde3fe1ac5ae76bfba91621c676ebf"
+    }
+  ],
+  "authenticated": true,
+  "branch": "init-refactor-documents",
+  "exported_at": "2026-11-13T08:55:33+00:00",
+  "host": "https://sonarcloud.io",
+  "project": "DieguinFC_dream-ml-refactor"
+}

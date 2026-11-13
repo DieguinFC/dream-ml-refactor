@@ -1,0 +1,1262 @@
+{
+  "authenticated": true,
+  "branch": "init-refactor-documents",
+  "exported_at": "2026-11-13T08:55:40+00:00",
+  "gate": {
+    "qualityGate": {
+      "default": true,
+      "id": 9,
+      "name": "Sonar way"
+    }
+  },
+  "gate_conditions": {
+    "actions": {
+      "associateProjects": false,
+      "copy": true,
+      "delete": false,
+      "manageConditions": false,
+      "rename": false,
+      "setAsDefault": false
+    },
+    "conditions": [
+      {
+        "error": "1",
+        "id": 35,
+        "metric": "new_security_rating",
+        "op": "GT"
+      },
+      {
+        "error": "1",
+        "id": 36,
+        "metric": "new_reliability_rating",
+        "op": "GT"
+      },
+      {
+        "error": "1",
+        "id": 37,
+        "metric": "new_maintainability_rating",
+        "op": "GT"
+      },
+      {
+        "error": "80",
+        "id": 38,
+        "metric": "new_coverage",
+        "op": "LT"
+      },
+      {
+        "error": "3",
+        "id": 39,
+        "metric": "new_duplicated_lines_density",
+        "op": "GT"
+      },
+      {
+        "error": "100",
+        "id": 76287,
+        "metric": "new_security_hotspots_reviewed",
+        "op": "LT"
+      }
+    ],
+    "id": 9,
+    "isAiCodeAssuredCompliant": false,
+    "isBuiltIn": true,
+    "isCleanAsYouCode": true,
+    "name": "Sonar way"
+  },
+  "gate_status": {
+    "projectStatus": {
+      "conditions": [
+        {
+          "actualValue": "1",
+          "comparator": "GT",
+          "errorThreshold": "1",
+          "metricKey": "new_reliability_rating",
+          "periodIndex": 1,
+          "status": "OK"
+        },
+        {
+          "actualValue": "1",
+          "comparator": "GT",
+          "errorThreshold": "1",
+          "metricKey": "new_security_rating",
+          "periodIndex": 1,
+          "status": "OK"
+        },
+        {
+          "actualValue": "1",
+          "comparator": "GT",
+          "errorThreshold": "1",
+          "metricKey": "new_maintainability_rating",
+          "periodIndex": 1,
+          "status": "OK"
+        },
+        {
+          "actualValue": "0.0",
+          "comparator": "GT",
+          "errorThreshold": "3",
+          "metricKey": "new_duplicated_lines_density",
+          "periodIndex": 1,
+          "status": "OK"
+        },
+        {
+          "actualValue": "100.0",
+          "comparator": "LT",
+          "errorThreshold": "100",
+          "metricKey": "new_security_hotspots_reviewed",
+          "periodIndex": 1,
+          "status": "OK"
+        }
+      ],
+      "ignoredConditions": false,
+      "periods": [
+        {
+          "date": "2026-11-05T23:30:30+0000",
+          "index": 1,
+          "mode": "previous_version"
+        }
+      ],
+      "status": "OK"
+    }
+  },
+  "host": "https://sonarcloud.io",
+  "profiles": {
+    "actions": {
+      "create": true
+    },
+    "profiles": [
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 19,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1f",
+        "language": "abap",
+        "languageName": "ABAP",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T11:54:06+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 14,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1g",
+        "language": "ansible",
+        "languageName": "Ansible",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-08-17T13:01:49+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 50,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqpnC1ELI2PKi0Q",
+        "language": "apex",
+        "languageName": "Apex",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-10-29T15:54:38+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 23,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1Y",
+        "language": "azurepipelines",
+        "languageName": "Azure Pipelines",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-10-29T15:55:16+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 27,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1e",
+        "language": "azureresourcemanager",
+        "languageName": "Azure Resource Manager",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T11:53:33+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 106,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi00",
+        "language": "c",
+        "languageName": "C",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-09T12:45:07+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 22,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi0x",
+        "language": "cloudformation",
+        "languageName": "CloudFormation",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T12:00:32+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 28,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqpnC1ELI2PKi0A",
+        "language": "cobol",
+        "languageName": "COBOL",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T14:51:48+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 176,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi0b",
+        "language": "cpp",
+        "languageName": "C++",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-09T12:44:54+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 166,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1w",
+        "language": "cs",
+        "languageName": "C#",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-09T10:33:42+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 30,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1V",
+        "language": "css",
+        "languageName": "CSS",
+        "lastUsed": "2026-11-09T06:28:23+0000",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-10-23T13:23:29+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 30,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi0n",
+        "language": "dart",
+        "languageName": "Dart",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T11:57:33+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 4,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1m",
+        "language": "dataweave",
+        "languageName": "DataWeave",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T14:54:41+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 37,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1h",
+        "language": "docker",
+        "languageName": "Docker",
+        "lastUsed": "2026-11-09T06:28:23+0000",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-10-29T15:56:47+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 11,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi0s",
+        "language": "flex",
+        "languageName": "Flex",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T11:59:04+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 32,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1n",
+        "language": "githubactions",
+        "languageName": "GitHub Actions",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-10-29T15:58:24+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 52,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi06",
+        "language": "go",
+        "languageName": "Go",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-10-05T15:30:42+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 5,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1l",
+        "language": "gosu",
+        "languageName": "Gosu",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T14:54:12+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 36,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1b",
+        "language": "groovy",
+        "languageName": "Groovy",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-11T12:48:42+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 259,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1S",
+        "language": "ipynb",
+        "languageName": "IPython Notebooks",
+        "lastUsed": "2026-10-26T01:20:33+0000",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-11-10T14:45:35+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 313,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1_",
+        "language": "java",
+        "languageName": "Java",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-10-22T16:45:12+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 6,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi0p",
+        "language": "jcl",
+        "languageName": "JCL",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T11:58:02+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 249,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1K",
+        "language": "js",
+        "languageName": "JavaScript",
+        "lastUsed": "2026-11-09T06:28:23+0000",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-10-14T16:47:14+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 2,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1i",
+        "language": "json",
+        "languageName": "JSON",
+        "lastUsed": "2026-11-09T06:28:23+0000",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-08-17T13:05:43+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 0,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqpnC1ELI2PKizr",
+        "language": "jsp",
+        "languageName": "JSP",
+        "name": "Sonar way comprehensive",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2019-01-31T08:12:02+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 82,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi04",
+        "language": "kotlin",
+        "languageName": "Kotlin",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T12:02:36+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 18,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1U",
+        "language": "kubernetes",
+        "languageName": "Kubernetes",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-08-17T12:43:49+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 99,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1o",
+        "language": "objc",
+        "languageName": "Objective-C",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T14:56:29+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 97,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1k",
+        "language": "php",
+        "languageName": "PHP",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T14:53:40+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 3,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi0-",
+        "language": "pli",
+        "languageName": "PL/I",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T12:04:01+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 49,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqpnC1ELI2PKi0O",
+        "language": "plsql",
+        "languageName": "PL/SQL",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T11:45:10+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 8,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1j",
+        "language": "postgres",
+        "languageName": "PostgreSQL",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-08-17T13:07:25+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 19,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqpnC1ELI2PKi0T",
+        "language": "powershell",
+        "languageName": "PowerShell",
+        "lastUsed": "2026-10-26T01:20:33+0000",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T11:47:18+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 303,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1N",
+        "language": "py",
+        "languageName": "Python",
+        "lastUsed": "2026-11-09T06:28:23+0000",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-11-10T14:44:54+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 19,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqpnC1ELI2PKiz_",
+        "language": "r",
+        "languageName": "R",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T12:05:28+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 7,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi02",
+        "language": "rpg",
+        "languageName": "RPG",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T12:02:07+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 26,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1A",
+        "language": "ruby",
+        "languageName": "Ruby",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T12:04:29+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 86,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqpnC1ELI2PKi0N",
+        "language": "rust",
+        "languageName": "Rust",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-11T07:46:23+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 8,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi0i",
+        "language": "scala",
+        "languageName": "Scala",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T11:54:39+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 357,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1a",
+        "language": "secrets",
+        "languageName": "Secrets",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-11-04T16:14:30+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 11,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1c",
+        "language": "shell",
+        "languageName": "Shell",
+        "lastUsed": "2026-10-26T01:20:33+0000",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T11:52:28+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 28,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi0Y",
+        "language": "swift",
+        "languageName": "Swift",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T11:49:14+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 49,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1d",
+        "language": "terraform",
+        "languageName": "Terraform",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-08-17T12:58:50+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 11,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1X",
+        "language": "text",
+        "languageName": "Text",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-08-17T12:53:43+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 248,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi16",
+        "language": "ts",
+        "languageName": "TypeScript",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-10-14T16:48:53+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 19,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi08",
+        "language": "tsql",
+        "languageName": "T-SQL",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T12:03:33+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 3,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1P",
+        "language": "vb",
+        "languageName": "Vb",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T11:50:54+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 90,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi0v",
+        "language": "vbnet",
+        "languageName": "VB.NET",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-09-03T12:00:04+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 36,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1R",
+        "language": "web",
+        "languageName": "HTML",
+        "lastUsed": "2026-10-26T01:20:33+0000",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-10-20T07:02:01+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 28,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1W",
+        "language": "xml",
+        "languageName": "XML",
+        "lastUsed": "2026-11-05T23:30:30+0000",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-08-17T12:52:00+0000"
+      },
+      {
+        "actions": {
+          "associateProjects": false,
+          "copy": true,
+          "delete": false,
+          "edit": false,
+          "grantPermissions": true,
+          "setAsDefault": false
+        },
+        "activeDeprecatedRuleCount": 0,
+        "activeRuleCount": 2,
+        "isBuiltIn": true,
+        "isDefault": true,
+        "isInherited": false,
+        "key": "AaF1yuqqnC1ELI2PKi1Z",
+        "language": "yaml",
+        "languageName": "YAML",
+        "lastUsed": "2026-10-26T01:20:33+0000",
+        "name": "Sonar way core",
+        "organization": "dieguinfc",
+        "requiredEntitlements": [],
+        "rulesUpdatedAt": "2026-08-17T12:55:21+0000"
+      }
+    ]
+  },
+  "project": "DieguinFC_dream-ml-refactor"
+}

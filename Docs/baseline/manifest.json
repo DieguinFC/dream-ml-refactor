@@ -1,0 +1,130 @@
+{
+  "name": "baseline-pre-refactor",
+  "purpose": "Frozen state of DREAM ML before any refactor or cleanup (Phase 0, task 0.3). Every before/after comparison in the thesis uses this snapshot.",
+  "issue": "#2",
+  "git": {
+    "repository": "DieguinFC/dream-ml-refactor",
+    "commit": "e02c0bbf34b5a8b34b2949facc7157f535667783",
+    "tag": "baseline-pre-refactor",
+    "branch_measured": "init-refactor-documents",
+    "develop_created_from": "e02c0bbf34b5a8b34b2949facc7157f535667783"
+  },
+  "ci": {
+    "workflow": "SonarCloud Analysis (.github/workflows/sonarcloud.yml)",
+    "run_id": 42134886141,
+    "run_url": "https://github.com/DieguinFC/dream-ml-refactor/actions/runs/42134886141",
+    "head_sha": "e02c0bbf34b5a8b34b2949facc7157f535667783",
+    "started_at": "2026-11-06T00:10:35Z",
+    "conclusion": "success",
+    "artifact": "backend-test-and-coverage-reports",
+    "artifact_expires_at": "2027-02-04T00:10:36Z",
+    "python": "3.11.18",
+    "pytest": "8.3.4",
+    "coverage_scope": "--source=api,apiTimeSeries",
+    "backend_tests": "All backend tests passed (ci-run/test-status.txt)",
+    "backend_coverage_percent": 47.59,
+    "backend_coverage_note": "coverage.py total for api and apiTimeSeries only. Sonar's 36.1 % also counts the frontend, which has no tests.",
+    "log": "sonar-run-13.txt"
+  },
+  "dependency_audits": {
+    "run_on": "2026-11-13",
+    "pip_audit": {
+      "version": "2.10.1",
+      "input": "DREAM-ML-backend/GEML/requirements-base.txt",
+      "flags": "--no-deps --disable-pip",
+      "result": "248 known vulnerabilities in 7 packages"
+    },
+    "npm_audit": {
+      "npm_version": "10.8.2",
+      "input": "DREAM-ML-frontend/frontend/package-lock.json",
+      "result": "47 vulnerabilities: 2 critical, 34 high, 8 moderate, 3 low"
+    }
+  },
+  "sonar": {
+    "host": "https://sonarcloud.io",
+    "organization": "dieguinfc",
+    "project_key": "DieguinFC_dream-ml-refactor",
+    "branch": "init-refactor-documents",
+    "project_version": "baseline-pre-refactor",
+    "analysis_of_baseline_commit": {
+      "key": "cb44493c-1351-40d5-ac21-9c6674e49106",
+      "date": "2026-11-06T00:34:59+0000",
+      "revision": "e02c0bbf34b5a8b34b2949facc7157f535667783"
+    },
+    "latest_analysis_at_export": {
+      "key": "1fafebf1-7a10-4395-8eba-87b06d358eba",
+      "date": "2026-11-09T06:28:23+0000",
+      "revision": "94a725424985f642432d1dfe3591e55ca98a77a1",
+      "note": "Commit 94a7254 only added documents outside sonar.sources. Its analysis has the same values as e02c0bb for ncloc, bugs, vulnerabilities, code_smells, security_hotspots, coverage and duplicated_lines_density (checked with api/measures/search_history on 2026-11-13). The exported JSON files come from this latest analysis."
+    },
+    "quality_profiles": {
+      "python": {
+        "name": "Sonar way core",
+        "built_in": true,
+        "active_rules": 303,
+        "rules_updated_at": "2026-11-10T14:44:54+0000"
+      },
+      "javascript": {
+        "name": "Sonar way core",
+        "built_in": true,
+        "active_rules": 249,
+        "rules_updated_at": "2026-10-14T16:47:14+0000"
+      },
+      "docker": {
+        "name": "Sonar way core",
+        "built_in": true,
+        "active_rules": 37,
+        "rules_updated_at": "2026-10-29T15:56:47+0000"
+      },
+      "note": "Values read at export time (2026-11-13). The Python profile was updated by SonarSource on 2026-11-10, after both baseline analyses, so a new analysis of the same code may not reproduce these counts. Compare before and after with analyses run under the same rules.",
+      "source_of_truth": "sonar-quality-config.json"
+    },
+    "quality_gate": {
+      "name": "Sonar way",
+      "built_in": true,
+      "default": true,
+      "clean_as_you_code": true,
+      "new_code_period": "previous_version",
+      "conditions": [
+        "new_security_rating worse than A fails",
+        "new_reliability_rating worse than A fails",
+        "new_maintainability_rating worse than A fails",
+        "new_coverage < 80 % fails",
+        "new_duplicated_lines_density > 3 % fails",
+        "new_security_hotspots_reviewed < 100 % fails"
+      ],
+      "status_at_export": "OK",
+      "note": "The branch status omitted new_coverage, most likely because the analysed new code had too few lines for Sonar to apply it; the condition is part of the gate. Risk R1 in the Phase -1 plan.",
+      "source_of_truth": "sonar-quality-config.json"
+    },
+    "headline_metrics": {
+      "ncloc": 23733,
+      "vulnerabilities": 212,
+      "code_smells": 223,
+      "bugs": 3,
+      "security_hotspots": 0,
+      "coverage_percent": 36.1,
+      "duplicated_lines_density_percent": 23.5
+    },
+    "config_files_sha256": {
+      "sonar-project.properties": "845fe8ccab0cb49fc7249227ce2cebbda671c640d7073436653ad53eb6da1ac7",
+      "DREAM-ML-backend/GEML/.coveragerc": "34187c0f45879d493fa70e17c746229e2e97bc589cc759dbd8dc2a5a41b21ddf",
+      "note": "Hashes of the files at e02c0bb. A later measurement with different hashes uses different exclusions or coverage scope."
+    }
+  },
+  "files": {
+    "export_sonar.py": "Script that produced the sonar-*.json files",
+    "sonar-analyses.json": "Analyses of the branch, with dates and revisions",
+    "sonar-measures.json": "All non-hidden project-level metrics",
+    "sonar-measures-by-file.json": "Per-file size, complexity, duplication, coverage and issue metrics",
+    "sonar-issues.json": "Every issue with rule, severity, location and status",
+    "sonar-hotspots.json": "Security hotspots",
+    "sonar-quality-config.json": "Quality gate status and definition, and quality profiles",
+    "pip-audit.json": "Known vulnerabilities in DREAM-ML-backend/GEML/requirements-base.txt",
+    "npm-audit.json": "Known vulnerabilities in DREAM-ML-frontend/frontend/package-lock.json",
+    "ci-run/": "Coverage and test results downloaded from CI run 42134886141",
+    "sonar-run-13.txt": "Full log of CI run 42134886141"
+  },
+  "exported_by": "DieguinFC",
+  "exported_at": "2026-11-13T08:55:40+00:00"
+}
