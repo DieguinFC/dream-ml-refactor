@@ -1,0 +1,51 @@
+name: Task
+description: A planned unit of work from the refactor plan
+title: "[<task id>] "
+body:
+  - type: input
+    id: phase
+    attributes:
+      label: Phase
+      description: Phase and task number from the plan, for example "Phase 0, task 0.14".
+    validations:
+      required: true
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: Why this task exists, and which thesis objective it serves.
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What will be done.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Checkable conditions for the task to be done.
+      value: |
+        - [ ]
+    validations:
+      required: true
+  - type: textarea
+    id: modules
+    attributes:
+      label: Affected modules
+      description: Files, apps or components that will change.
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification
+      description: Tests, commands or manual checks that prove it works.
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks
+      description: What could break, and how it would be detected.

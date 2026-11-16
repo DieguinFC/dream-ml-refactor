@@ -1,0 +1,26 @@
+name: Review follow-up
+description: A change requested in the professor's review of a merged PR
+title: "[review] "
+labels: ["review:follow-up"]
+body:
+  - type: input
+    id: pr
+    attributes:
+      label: Original PR
+      description: For example "#12".
+    validations:
+      required: true
+  - type: textarea
+    id: comment
+    attributes:
+      label: Review comment
+      description: Quote the comment, with a link to it.
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: Required change
+      description: What will be done to address it.
+    validations:
+      required: true
