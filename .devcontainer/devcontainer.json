@@ -1,39 +1,42 @@
 {
-  "name": "Django + React (Vite) Dev",
+  "name": "DREAM ML (Django + React)",
   "image": "mcr.microsoft.com/devcontainers/python:3.11-bookworm",
-  "forwardPorts": [8000, 5173],
+  "forwardPorts": [8000, 5173, 5000],
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
-      "version": "18"
+      "version": "20"
     },
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {},
     "ghcr.io/jungaretti/features/vim:1": {},
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
   },
-
-  "postCreateCommand": "npm install --prefix ./DREAM-ML-frontend/frontend && pip install --upgrade pip && pip install -r ./DREAM-ML-backend/GEML/requirements-base.txt -r ./DREAM-ML-backend/GEML/requirements-dev.txt",
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
   "customizations": {
     "vscode": {
       "extensions": [
         "ms-python.python",
+        "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-        "ms-azuretools.vscode-docker"
+        "ms-azuretools.vscode-docker",
+        "anthropic.claude-code"
       ]
     }
   },
-  "containerEnv":{
-"EXPERIMENTS_DIR":"/workspaces/dream-ml-c/experimentos",
-"HOST_EXPERIMENTS_DIR":"/workspaces/dream-ml-c/host_experimentos",
-"VITE_API_URL":"http://localhost:8000",
-"VITE_WS_URL":"ws://localhost:8000",
-"MLFLOW_UI_URL":"http://localhost:5000",
-"PYTHONHASHSEED":"42",
-"TF_DETERMINISTIC_OPS":"1",         
-"TF_CUDNN_DETERMINISTIC":"1",
-"OMP_NUM_THREADS":"1",
-"MKL_NUM_THREADS":"1",
-"OPENBLAS_NUM_THREADS":"1",
-"NUMEXPR_NUM_THREADS":"1",
-"MKL_CBWR":"COMPATIBLE",
+  "containerEnv": {
+    "EXPERIMENTS_DIR": "${containerWorkspaceFolder}/experimentos",
+    "HOST_EXPERIMENTS_DIR": "${containerWorkspaceFolder}/host_experimentos",
+    "VITE_API_URL": "http://localhost:8000",
+    "VITE_WS_URL": "ws://localhost:8000",
+    "MLFLOW_UI_URL": "http://localhost:5000",
+    "PYTHONHASHSEED": "42",
+    "TF_DETERMINISTIC_OPS": "1",
+    "TF_CUDNN_DETERMINISTIC": "1",
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "MKL_CBWR": "COMPATIBLE"
   },
   "remoteUser": "vscode"
 }
