@@ -1,0 +1,673 @@
+{
+  "authenticated": true,
+  "branch": "init-refactor-documents",
+  "exported_at": "2026-11-13T08:55:35+00:00",
+  "host": "https://sonarcloud.io",
+  "measures": [
+    {
+      "bestValue": true,
+      "metric": "accepted_issues",
+      "value": "0"
+    },
+    {
+      "metric": "alert_status",
+      "value": "OK"
+    },
+    {
+      "bestValue": false,
+      "metric": "blocker_violations",
+      "value": "45"
+    },
+    {
+      "bestValue": false,
+      "metric": "bugs",
+      "value": "3"
+    },
+    {
+      "metric": "classes",
+      "value": "16"
+    },
+    {
+      "bestValue": false,
+      "metric": "code_smells",
+      "value": "223"
+    },
+    {
+      "bestValue": false,
+      "metric": "cognitive_complexity",
+      "value": "3392"
+    },
+    {
+      "metric": "comment_lines",
+      "value": "4438"
+    },
+    {
+      "bestValue": false,
+      "metric": "comment_lines_density",
+      "value": "15.8"
+    },
+    {
+      "metric": "complexity",
+      "value": "3294"
+    },
+    {
+      "bestValue": true,
+      "metric": "confirmed_issues",
+      "value": "0"
+    },
+    {
+      "bestValue": false,
+      "metric": "coverage",
+      "value": "36.1"
+    },
+    {
+      "bestValue": false,
+      "metric": "critical_violations",
+      "value": "19"
+    },
+    {
+      "bestValue": false,
+      "metric": "duplicated_blocks",
+      "value": "239"
+    },
+    {
+      "bestValue": false,
+      "metric": "duplicated_files",
+      "value": "23"
+    },
+    {
+      "bestValue": false,
+      "metric": "duplicated_lines",
+      "value": "7386"
+    },
+    {
+      "bestValue": false,
+      "metric": "duplicated_lines_density",
+      "value": "23.5"
+    },
+    {
+      "bestValue": true,
+      "metric": "effort_to_reach_maintainability_rating_a",
+      "value": "0"
+    },
+    {
+      "bestValue": true,
+      "metric": "false_positive_issues",
+      "value": "0"
+    },
+    {
+      "metric": "files",
+      "value": "64"
+    },
+    {
+      "metric": "functions",
+      "value": "937"
+    },
+    {
+      "bestValue": true,
+      "metric": "info_violations",
+      "value": "0"
+    },
+    {
+      "bestValue": false,
+      "metric": "line_coverage",
+      "value": "36.1"
+    },
+    {
+      "metric": "lines",
+      "value": "31479"
+    },
+    {
+      "metric": "lines_to_cover",
+      "value": "8614"
+    },
+    {
+      "bestValue": false,
+      "metric": "maintainability_issue_severity",
+      "value": "15"
+    },
+    {
+      "metric": "maintainability_issues",
+      "value": "{\"total\":220,\"HIGH\":0,\"MEDIUM\":1,\"LOW\":219,\"INFO\":0,\"BLOCKER\":0}"
+    },
+    {
+      "bestValue": false,
+      "metric": "major_violations",
+      "value": "89"
+    },
+    {
+      "bestValue": false,
+      "metric": "minor_violations",
+      "value": "285"
+    },
+    {
+      "metric": "ncloc",
+      "value": "23733"
+    },
+    {
+      "metric": "ncloc_language_distribution",
+      "value": "css=97;docker=29;js=13640;json=1;py=9966"
+    },
+    {
+      "metric": "new_accepted_issues",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_blocker_violations",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_bugs",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_bugs_severity",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_code_smells",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_code_smells_severity",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_conditions_to_cover",
+      "periods": [
+        {
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_critical_violations",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_duplicated_blocks",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_duplicated_lines",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_duplicated_lines_density",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0.0"
+        }
+      ]
+    },
+    {
+      "metric": "new_info_violations",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_lines",
+      "periods": [
+        {
+          "index": 1,
+          "value": "88"
+        }
+      ]
+    },
+    {
+      "metric": "new_lines_to_cover",
+      "periods": [
+        {
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_maintainability_issue_severity",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_maintainability_rating",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "1.0"
+        }
+      ]
+    },
+    {
+      "metric": "new_major_violations",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_minor_violations",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_ncloc",
+      "periods": [
+        {
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_reliability_issue_severity",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_reliability_rating",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "1.0"
+        }
+      ]
+    },
+    {
+      "metric": "new_reliability_remediation_effort",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_security_hotspots",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_security_hotspots_reviewed",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "100.0"
+        }
+      ]
+    },
+    {
+      "metric": "new_security_issue_severity",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_security_rating",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "1.0"
+        }
+      ]
+    },
+    {
+      "metric": "new_security_remediation_effort",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_security_review_rating",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "1.0"
+        }
+      ]
+    },
+    {
+      "metric": "new_software_quality_maintainability_issues",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_software_quality_reliability_issues",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_software_quality_security_issues",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_sqale_debt_ratio",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0.0"
+        }
+      ]
+    },
+    {
+      "metric": "new_technical_debt",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_uncovered_conditions",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_uncovered_lines",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_violations",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_vulnerabilities",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "metric": "new_vulnerabilities_severity",
+      "periods": [
+        {
+          "bestValue": true,
+          "index": 1,
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "bestValue": false,
+      "metric": "open_issues",
+      "value": "438"
+    },
+    {
+      "metric": "quality_gate_details",
+      "value": "{\"level\":\"OK\",\"conditions\":[{\"metric\":\"new_reliability_rating\",\"op\":\"GT\",\"period\":1,\"error\":\"1\",\"actual\":\"1\",\"level\":\"OK\"},{\"metric\":\"new_security_rating\",\"op\":\"GT\",\"period\":1,\"error\":\"1\",\"actual\":\"1\",\"level\":\"OK\"},{\"metric\":\"new_maintainability_rating\",\"op\":\"GT\",\"period\":1,\"error\":\"1\",\"actual\":\"1\",\"level\":\"OK\"},{\"metric\":\"new_duplicated_lines_density\",\"op\":\"GT\",\"period\":1,\"error\":\"3\",\"actual\":\"0.0\",\"level\":\"OK\"},{\"metric\":\"new_security_hotspots_reviewed\",\"op\":\"LT\",\"period\":1,\"error\":\"100\",\"actual\":\"100.0\",\"level\":\"OK\"}],\"ignoredConditions\":false}"
+    },
+    {
+      "bestValue": false,
+      "metric": "reliability_issue_severity",
+      "value": "15"
+    },
+    {
+      "metric": "reliability_issues",
+      "value": "{\"total\":226,\"HIGH\":0,\"MEDIUM\":226,\"LOW\":0,\"INFO\":0,\"BLOCKER\":0}"
+    },
+    {
+      "bestValue": false,
+      "metric": "reliability_rating",
+      "value": "3.0"
+    },
+    {
+      "bestValue": false,
+      "metric": "reliability_remediation_effort",
+      "value": "15"
+    },
+    {
+      "bestValue": true,
+      "metric": "reopened_issues",
+      "value": "0"
+    },
+    {
+      "bestValue": true,
+      "metric": "security_hotspots",
+      "value": "0"
+    },
+    {
+      "bestValue": true,
+      "metric": "security_hotspots_reviewed",
+      "value": "100.0"
+    },
+    {
+      "bestValue": false,
+      "metric": "security_issue_severity",
+      "value": "25"
+    },
+    {
+      "metric": "security_issues",
+      "value": "{\"total\":213,\"HIGH\":19,\"MEDIUM\":82,\"LOW\":67,\"INFO\":0,\"BLOCKER\":45}"
+    },
+    {
+      "bestValue": false,
+      "metric": "security_rating",
+      "value": "5.0"
+    },
+    {
+      "bestValue": false,
+      "metric": "security_remediation_effort",
+      "value": "5961"
+    },
+    {
+      "bestValue": true,
+      "metric": "security_review_rating",
+      "value": "1.0"
+    },
+    {
+      "bestValue": false,
+      "metric": "skipped_tests",
+      "value": "42"
+    },
+    {
+      "bestValue": false,
+      "metric": "software_quality_maintainability_issues",
+      "value": "220"
+    },
+    {
+      "bestValue": false,
+      "metric": "software_quality_reliability_issues",
+      "value": "226"
+    },
+    {
+      "bestValue": false,
+      "metric": "software_quality_security_issues",
+      "value": "213"
+    },
+    {
+      "bestValue": false,
+      "metric": "sqale_debt_ratio",
+      "value": "0.1"
+    },
+    {
+      "bestValue": false,
+      "metric": "sqale_index",
+      "value": "458"
+    },
+    {
+      "bestValue": true,
+      "metric": "sqale_rating",
+      "value": "1.0"
+    },
+    {
+      "metric": "statements",
+      "value": "8856"
+    },
+    {
+      "bestValue": true,
+      "metric": "test_errors",
+      "value": "0"
+    },
+    {
+      "metric": "test_execution_time",
+      "value": "1051460"
+    },
+    {
+      "bestValue": true,
+      "metric": "test_failures",
+      "value": "0"
+    },
+    {
+      "metric": "tests",
+      "value": "543"
+    },
+    {
+      "bestValue": false,
+      "metric": "uncovered_lines",
+      "value": "5504"
+    },
+    {
+      "bestValue": false,
+      "metric": "violations",
+      "value": "438"
+    },
+    {
+      "bestValue": false,
+      "metric": "vulnerabilities",
+      "value": "212"
+    },
+    {
+      "bestValue": true,
+      "metric": "wont_fix_issues",
+      "value": "0"
+    }
+  ],
+  "project": "DieguinFC_dream-ml-refactor"
+}
