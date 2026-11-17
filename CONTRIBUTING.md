@@ -4,6 +4,17 @@ These rules apply to every change made during the architectural refactor of DREA
 
 All repository text (issues, PRs, commits, code comments and docs) is written in **English**. Existing user-facing strings in the app stay as they are.
 
+## Local setup
+
+Install the commit hooks once per clone, from the repository root:
+
+```bash
+python -m pip install pre-commit==4.7.0   # also in requirements-dev.txt
+pre-commit install
+```
+
+The dev container does this automatically. The hooks reject commits to `main` or `develop`, commit messages that are not Conventional Commits, generated artifacts (coverage reports, `db.sqlite3`, `.pyc`, `.DS_Store`) and secrets. They only check what each commit adds. Never bypass them with `--no-verify`; if a hook is wrong, fix it in a PR.
+
 ## Workflow
 
 ```text
