@@ -123,7 +123,7 @@ A PR is done when:
 
 ## Coverage
 
-Enforced by CI once the unified pipeline is in place (Phase −1, block E):
+Enforced by the `backend` job in `.github/workflows/ci.yml`:
 
 | Rule | Threshold |
 |---|---|
