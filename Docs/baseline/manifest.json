@@ -110,7 +110,21 @@
       "sonar-project.properties": "845fe8ccab0cb49fc7249227ce2cebbda671c640d7073436653ad53eb6da1ac7",
       "DREAM-ML-backend/GEML/.coveragerc": "34187c0f45879d493fa70e17c746229e2e97bc589cc759dbd8dc2a5a41b21ddf",
       "note": "Hashes of the files at e02c0bb. A later measurement with different hashes uses different exclusions or coverage scope."
-    }
+    },
+    "later_observations": [
+      {
+        "recorded_on": "2026-11-17",
+        "analysis": {
+          "branch": "develop",
+          "date": "2026-11-16T05:40:48+0000",
+          "revision": "a125c7cbd9e4286ae52e3c5a75c1d1feff5b20a8"
+        },
+        "code_identical_to_baseline": true,
+        "difference": "vulnerabilities 212 -> 210 (open issues 438 -> 436). All other headline metrics are equal.",
+        "cause": "The baseline analysis reported python:S5332 (clear-text HTTP) twice on api/views.py:843 and apiTimeSeries/views.py:436: once for the whole f-string (offsets 25-162) and once for the 'http://' fragment inside it (offsets 27-34). The develop analysis reports only the whole f-string. The analysed code and sonar-project.properties are identical, so the change comes from SonarCloud's Python analyzer, most likely the profile update of 2026-11-10. The insecure URLs are still reported.",
+        "impact": "Issue counts can change between analyses without code changes. Before/after comparisons must re-analyse the baseline tag under the same analyzer version as the final state, or discount such rule-driven differences explicitly. The frozen exports in this folder are not modified."
+      }
+    ]
   },
   "files": {
     "export_sonar.py": "Script that produced the sonar-*.json files",
