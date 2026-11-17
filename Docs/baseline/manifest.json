@@ -123,6 +123,11 @@
         "difference": "vulnerabilities 212 -> 210 (open issues 438 -> 436). All other headline metrics are equal.",
         "cause": "The baseline analysis reported python:S5332 (clear-text HTTP) twice on api/views.py:843 and apiTimeSeries/views.py:436: once for the whole f-string (offsets 25-162) and once for the 'http://' fragment inside it (offsets 27-34). The develop analysis reports only the whole f-string. The analysed code and sonar-project.properties are identical, so the change comes from SonarCloud's Python analyzer, most likely the profile update of 2026-11-10. The insecure URLs are still reported.",
         "impact": "Issue counts can change between analyses without code changes. Before/after comparisons must re-analyse the baseline tag under the same analyzer version as the final state, or discount such rule-driven differences explicitly. The frozen exports in this folder are not modified."
+      },
+      {
+        "recorded_on": "2026-11-17",
+        "change": "Frontend coverage reporting added (task 0.39): Vitest writes DREAM-ML-frontend/frontend/coverage/lcov.info and sonar-project.properties sets sonar.javascript.lcov.reportPaths. Sources and exclusions are unchanged.",
+        "impact": "In the baseline, Sonar received no frontend coverage report, so frontend lines counted as uncovered in the 36.1 % project coverage. From this change on, frontend lines exercised by tests count as covered. Compare backend coverage (47.59 % in ci-run/coverage-report.txt) separately from project-wide coverage."
       }
     ]
   },

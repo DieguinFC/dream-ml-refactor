@@ -140,7 +140,7 @@ Enforced by the `backend` job in `.github/workflows/ci.yml`:
 | Changed backend lines in a PR (`diff-cover`) | **95 %** |
 | Exception | The `exception:coverage` label, applied only by the repository owner with the reason written in the PR. The shortfall stays visible in the CI run |
 
-Frontend coverage rules are added once the frontend has a test suite.
+Frontend tests run in CI and their coverage is sent to SonarCloud. Frontend coverage thresholds are enforced once `TrainCard` and `TSTrainCard` have tests.
 
 ## AI assistants
 
