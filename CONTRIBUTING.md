@@ -71,6 +71,15 @@ Use `Refs #<n>` in commits and `Closes #<n>` in the PR. GitHub only closes an is
 
 ## Pull requests
 
+### Automatic checks
+
+Two checks must pass before merging:
+
+- `ci-gate` (`.github/workflows/ci.yml`): tests, coverage, lint, build, secret scan and SonarCloud.
+- `process` (`.github/workflows/pr-process.yml`): the title and branch follow [Naming](#naming); the body references the issue; every box under **Manual verification** and the AI review box are checked; `Docs/baseline/` only gains files or additive notes in `manifest.json`; Sonar sources, exclusions and issue rules are unchanged unless the owner adds `exception:sonar-config`; a new `skip`, `xfail` or `pragma: no cover` links an issue on the same line.
+
+`process` also adds `flag:test-changed` when existing tests change or new skips appear, and `flag:config-changed` when CI, Sonar, coverage or hook configuration changes, so those PRs get a closer review. It re-runs on every edit of the PR, which is cheap; `ci.yml` does not.
+
 ### Size
 
 Keep PRs **under 400 changed lines**. Mechanical moves and generated files are the only exception, and the PR must say so.

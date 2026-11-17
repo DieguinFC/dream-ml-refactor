@@ -1,0 +1,60 @@
+name: PR process
+
+# Separate from ci.yml: editing the PR (for example ticking a box) re-runs
+# only this fast check, not the test suite.
+on:
+  pull_request:
+    branches: [develop, main]
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-process-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  process:
+    name: process
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Test the checker
+        run: python -m unittest discover -s scripts/ci/tests
+
+      - name: Check PR
+        id: check
+        # PR fields are user input: pass them through env, never interpolate them into the script.
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          LABELS_TO_ADD: ${{ runner.temp }}/labels.txt
+        run: python scripts/ci/check_pr.py
+
+      - name: Add flag labels
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          LABELS_FILE: ${{ runner.temp }}/labels.txt
+        run: |
+          [ -f "$LABELS_FILE" ] || exit 0
+          while IFS= read -r label; do
+            [ -n "$label" ] && gh pr edit "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --add-label "$label"
+          done < "$LABELS_FILE"
