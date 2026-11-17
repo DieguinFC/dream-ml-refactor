@@ -207,6 +207,21 @@ jobs:
         working-directory: ${{ env.FRONTEND_DIR }}
         run: npm run build
 
+      - name: Tests with coverage
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: |
+          npm run test:coverage
+          # LCOV paths are relative to the frontend; Sonar resolves them from the repository root.
+          sed -i 's#^SF:#SF:DREAM-ML-frontend/frontend/#' coverage/lcov.info
+
+      - name: Upload reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-reports
+          if-no-files-found: warn
+          path: DREAM-ML-frontend/frontend/coverage/lcov.info
+
   docker:
     name: Docker images
     needs: changes
@@ -286,6 +301,13 @@ jobs:
         with:
           name: backend-reports
           path: DREAM-ML-backend/GEML
+
+      - name: Download frontend reports
+        if: needs.frontend.result != 'skipped'
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-reports
+          path: DREAM-ML-frontend/frontend/coverage
 
       - name: Check configuration
         env:
