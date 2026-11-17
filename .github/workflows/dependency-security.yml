@@ -1,14 +1,21 @@
 name: Dependency Security Scan
 
+# Not a required check: scan.sh may fail until task 0.27.
 on:
-  push:
-    branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+    paths:
+      - 'DREAM-ML-backend/GEML/requirements-*.txt'
+      - 'DREAM-ML-frontend/frontend/package*.json'
+      - 'dependency-security/**'
+      - '.github/workflows/dependency-security.yml'
   schedule:
     # Run daily at 00:00 UTC
     - cron: '0 0 * * *'
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   dependency-security:

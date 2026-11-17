@@ -36,7 +36,7 @@ There are no frontend tests; ESLint and the production build are the only checks
 
 Copy `.env.example` to `.env`, then `docker compose up --build`. Frontend is on port 5173, Django/ASGI backend on 8000. MLflow on 5000 runs inside the backend container and is started on demand by the `start-mlflow` view. Platform-specific Buildx steps are in each service's `BUILD_INSTRUCTIONS.md`.
 
-CI workflows are in `.github/workflows`: `django.yml` runs on `main`, `sonarcloud.yml` on `init-refactor-documents` and on manual dispatch, and `dependency-security.yml` on `main`, `develop` and a daily schedule. A unified `ci.yml` replaces them during Phase −1.
+CI is `.github/workflows/ci.yml`: on PRs and pushes to `develop` and `main` it runs backend tests with coverage gates, frontend lint and build, Docker builds when their inputs change, a secret scan of new commits and SonarCloud, and reports one required check, `ci-gate`. `dependency-security.yml` runs daily, on manual dispatch and on PRs that change dependency files; it is not required.
 
 ## Architecture
 

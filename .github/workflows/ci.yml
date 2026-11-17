@@ -1,0 +1,327 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [develop, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  PYTHON_VERSION: "3.11"
+  NODE_VERSION: "20"
+  BACKEND_DIR: DREAM-ML-backend/GEML
+  FRONTEND_DIR: DREAM-ML-frontend/frontend
+  # Global backend coverage ratchet: measured baseline (47.59 %) rounded down.
+  # Raised at the end of each phase, never lowered.
+  COVERAGE_FLOOR: "47"
+  # Coverage required on backend lines changed by a PR.
+  DIFF_COVERAGE: "95"
+
+jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      docker: ${{ steps.filter.outputs.docker }}
+      ci: ${{ steps.filter.outputs.ci }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3.0.2
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'DREAM-ML-backend/**'
+            frontend:
+              - 'DREAM-ML-frontend/**'
+            docker:
+              - '**/dockerfile'
+              - '**/.dockerignore'
+              - 'docker-compose.yml'
+              - 'DREAM-ML-backend/GEML/requirements-*.txt'
+              - 'DREAM-ML-frontend/frontend/package*.json'
+              - 'DREAM-ML-frontend/frontend/nginx.conf'
+            ci:
+              - '.github/workflows/ci.yml'
+              - 'sonar-project.properties'
+
+  backend:
+    name: Backend tests
+    needs: changes
+    # Always on push, so every develop/main analysis has coverage reports.
+    if: github.event_name != 'pull_request' || needs.changes.outputs.backend == 'true' || needs.changes.outputs.ci == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: |
+            DREAM-ML-backend/GEML/requirements-base.txt
+            DREAM-ML-backend/GEML/requirements-dev.txt
+
+      - name: Install dependencies
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-base.txt -r requirements-dev.txt
+
+      - name: Apply migrations
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: python manage.py migrate --no-input
+
+      - name: Run tests with coverage
+        id: tests
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: |
+          set +e
+          python -m coverage run --source=api,apiTimeSeries -m pytest \
+            tests/api_tests tests/apiTimeSeries_tests \
+            -ra --tb=short --durations=30 \
+            --timeout=1800 --timeout-method=signal \
+            --junitxml=test-results.xml
+          test_status=$?
+          set -e
+
+          python -m coverage xml -o coverage.xml || true
+          python -m coverage report > coverage-report.txt 2>&1 || true
+
+          {
+            echo "## Backend tests"
+            echo ""
+            echo "pytest exit code: \`${test_status}\`"
+            echo ""
+            echo '```text'
+            tail -n 40 coverage-report.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          exit "$test_status"
+
+      - name: Upload reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-reports
+          if-no-files-found: warn
+          path: |
+            DREAM-ML-backend/GEML/coverage.xml
+            DREAM-ML-backend/GEML/test-results.xml
+            DREAM-ML-backend/GEML/coverage-report.txt
+
+      - name: Global coverage ratchet
+        if: ${{ !cancelled() && hashFiles('DREAM-ML-backend/GEML/coverage.xml') != '' }}
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: python -m coverage report --fail-under="$COVERAGE_FLOOR" > /dev/null
+
+      - name: Coverage of changed lines
+        if: ${{ !cancelled() && github.event_name == 'pull_request' && hashFiles('DREAM-ML-backend/GEML/coverage.xml') != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          # Labels are read at run time, so re-running the job sees a label added later.
+          labels=$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json labels --jq '.labels[].name')
+          if printf '%s\n' "$labels" | grep -qx 'exception:coverage'; then
+            echo "::warning::exception:coverage is set; reporting changed-line coverage without enforcing ${DIFF_COVERAGE} %."
+            diff-cover "$BACKEND_DIR/coverage.xml" --compare-branch="origin/$BASE_REF" --markdown-report diff-cover.md
+          else
+            diff-cover "$BACKEND_DIR/coverage.xml" --compare-branch="origin/$BASE_REF" --markdown-report diff-cover.md --fail-under="$DIFF_COVERAGE"
+          fi
+
+      - name: Publish changed-line coverage
+        if: ${{ !cancelled() && hashFiles('diff-cover.md') != '' }}
+        run: cat diff-cover.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Ruff (changed files)
+        if: ${{ !cancelled() }}
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: |
+          # Limited to changed files until the existing errors are fixed (task 0.20).
+          if [ "$EVENT" = "pull_request" ]; then
+            range="$PR_BASE...$PR_HEAD"
+          elif [ -n "$PUSH_BEFORE" ] && [ "$PUSH_BEFORE" != "0000000000000000000000000000000000000000" ]; then
+            range="$PUSH_BEFORE..$GITHUB_SHA"
+          else
+            echo "No commit range for this event; skipping Ruff."
+            exit 0
+          fi
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$range" -- 'DREAM-ML-backend/*.py')
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No changed backend Python files."
+            exit 0
+          fi
+          ruff check --select E9,F63,F7,F82 --output-format github "${files[@]}"
+
+  frontend:
+    name: Frontend checks
+    needs: changes
+    if: github.event_name != 'pull_request' || needs.changes.outputs.frontend == 'true' || needs.changes.outputs.ci == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: DREAM-ML-frontend/frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: npm ci
+
+      - name: Lint
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: npm run lint
+
+      - name: Build
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: npm run build
+
+  docker:
+    name: Docker images
+    needs: changes
+    if: needs.changes.outputs.docker == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build --file dockerfile --tag dream-ml-backend:ci .
+        working-directory: ${{ env.BACKEND_DIR }}
+
+      - name: Build frontend image
+        run: docker build --file dockerfile --tag dream-ml-frontend:ci .
+        working-directory: ${{ env.FRONTEND_DIR }}
+
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GITLEAKS_VERSION: "8.30.1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install gitleaks
+        run: |
+          base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+          tarball="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sSfL -o "$tarball" "$base/$tarball"
+          curl -sSfL -o checksums.txt "$base/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          grep " $tarball\$" checksums.txt | sha256sum --check --strict
+          tar -xzf "$tarball" gitleaks
+          sudo mv gitleaks /usr/local/bin/gitleaks
+
+      - name: Scan new commits
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: |
+          # Only commits new to this PR or push. The full history is cleaned in task 0.21.
+          if [ "$EVENT" = "pull_request" ]; then
+            log_opts="$PR_BASE..$PR_HEAD"
+          elif [ -n "$PUSH_BEFORE" ] && [ "$PUSH_BEFORE" != "0000000000000000000000000000000000000000" ]; then
+            log_opts="$PUSH_BEFORE..$GITHUB_SHA"
+          else
+            log_opts="-1 $GITHUB_SHA"
+          fi
+          echo "Scanning: $log_opts"
+          gitleaks git --log-opts="$log_opts" --redact --no-banner --exit-code 1 .
+
+  sonar:
+    name: SonarCloud
+    needs: [changes, backend, frontend]
+    if: >-
+      ${{ !cancelled()
+          && (needs.backend.result != 'skipped' || needs.frontend.result != 'skipped')
+          && github.actor != 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download backend reports
+        if: needs.backend.result != 'skipped'
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-reports
+          path: DREAM-ML-backend/GEML
+
+      - name: Check configuration
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
+        run: |
+          if [ -z "$SONAR_TOKEN" ] || [ -z "$SONAR_ORGANIZATION" ]; then
+            echo "::error::Set the SONAR_TOKEN secret and the SONAR_ORGANIZATION variable."
+            exit 1
+          fi
+
+      - name: Scan and wait for the quality gate
+        uses: SonarSource/sonarqube-scan-action@v8.4.1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
+            -Dsonar.qualitygate.wait=true
+            -Dsonar.qualitygate.timeout=600
+
+  ci-gate:
+    name: ci-gate
+    needs: [changes, backend, frontend, docker, secrets, sonar]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check job results
+        env:
+          FAILED: ${{ contains(needs.*.result, 'failure') }}
+          CANCELLED: ${{ contains(needs.*.result, 'cancelled') }}
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          echo "$RESULTS"
+          # A job skipped by the path filter counts as success.
+          if [ "$FAILED" = "true" ] || [ "$CANCELLED" = "true" ]; then
+            echo "::error::At least one CI job failed or was cancelled."
+            exit 1
+          fi
