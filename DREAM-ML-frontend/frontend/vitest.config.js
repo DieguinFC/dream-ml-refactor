@@ -12,6 +12,12 @@ export default defineConfig({
     setupFiles: ['./tests/setup.js'],
     coverage: {
       provider: 'v8',
+      // Count executable lines the way Istanbul does; plain v8 counts every source line,
+      // which made frontend lines-to-cover about six times larger than Sonar's own count.
+      experimentalAstAwareRemapping: true,
+      // Report only files the tests load. Sonar computes the other files' executable lines
+      // itself, as it did for the baseline, so project coverage stays comparable.
+      all: false,
       include: ['src/**/*.{js,jsx}'],
       reporter: ['text-summary', 'lcov'],
       reportsDirectory: 'coverage',
