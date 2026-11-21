@@ -1,17 +1,21 @@
-# Local checks that run before each commit. Install once per clone:
+# Local checks that run on commit and push. Install once per clone:
 #   pre-commit install
-# Formatters (Ruff, ESLint, Prettier) are deliberately left out: reformatting
-# files of thousands of lines would hide real changes. Linting runs in CI.
-default_install_hook_types: [pre-commit, commit-msg]
+# Formatters (Ruff format, ESLint, Prettier) are deliberately left out: reformatting
+# files of thousands of lines would hide real changes. Tests run in CI, not here.
+default_install_hook_types: [pre-commit, prepare-commit-msg, commit-msg, pre-push]
+default_stages: [pre-commit]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
       - id: no-commit-to-branch
         args: [--branch, main, --branch, develop]
+        stages: [pre-commit]
       - id: check-merge-conflict
+        stages: [pre-commit]
       - id: check-added-large-files
         exclude: ^Docs/baseline/
+        stages: [pre-commit]
 
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v4.4.0
@@ -24,6 +28,16 @@ repos:
     rev: v8.30.1
     hooks:
       - id: gitleaks
+        stages: [pre-commit]
+
+  # Only the error rules that CI's Ruff step checks (syntax errors, undefined names).
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.3
+    hooks:
+      - id: ruff-check
+        args: [--select, "E9,F63,F7,F82"]
+        files: ^DREAM-ML-backend/.*\.py$
+        stages: [pre-commit]
 
   - repo: local
     hooks:
@@ -33,3 +47,24 @@ repos:
         entry: Generated artifact must not be committed
         files: (^|/)(\.coverage|coverage\.(xml|json)|test-results\.xml|db\.sqlite3|\.DS_Store)$|,cover$|\.pyc$|(^|/)htmlcov/
         exclude: ^Docs/baseline/
+
+      - id: add-issue-ref
+        name: Add "Refs #<issue>" from the branch name
+        language: python
+        entry: python scripts/hooks/add_issue_ref.py
+        stages: [prepare-commit-msg]
+
+      - id: no-ai-coauthor
+        name: Block AI co-author trailers
+        language: pygrep
+        entry: '^(co-authored-by:.*(claude|anthropic)|.*generated with \[?claude code)'
+        args: [--ignore-case]
+        stages: [commit-msg]
+
+      - id: check-push
+        name: Check pushed branch name and target
+        language: python
+        entry: python scripts/hooks/check_push.py
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]

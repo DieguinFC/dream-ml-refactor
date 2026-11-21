@@ -13,7 +13,15 @@ python -m pip install pre-commit==4.7.0   # also in requirements-dev.txt
 pre-commit install
 ```
 
-The dev container does this automatically. The hooks reject commits to `main` or `develop`, commit messages that are not Conventional Commits, generated artifacts (coverage reports, `db.sqlite3`, `.pyc`, `.DS_Store`) and secrets. They only check what each commit adds. Never bypass them with `--no-verify`; if a hook is wrong, fix it in a PR.
+The dev container does this automatically. Run `pre-commit install` again whenever `default_install_hook_types` in `.pre-commit-config.yaml` changes. The hooks only check what each commit or push adds:
+
+| When | Check |
+|---|---|
+| Commit | Rejects commits to `main` or `develop`, merge conflict markers, large files, secrets and generated artifacts (coverage reports, `db.sqlite3`, `.pyc`, `.DS_Store`); runs Ruff's error rules (`E9,F63,F7,F82`, as in CI) on changed backend Python files |
+| Commit message | Adds `Refs #<n>` from the branch name when the message does not mention that issue; rejects messages that are not Conventional Commits and AI co-author trailers |
+| Push | Rejects pushes to `main` or `develop` and branch names that do not follow [Naming](#naming) |
+
+Never bypass them with `--no-verify`; if a hook is wrong, fix it in a PR. Their scripts are in `scripts/hooks/`.
 
 ## Workflow
 
