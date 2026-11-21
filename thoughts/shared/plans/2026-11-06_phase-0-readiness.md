@@ -18,6 +18,7 @@ Recorded on 2026-11-16. Where this plan disagrees with the list below, the list 
 - **The repository is a fork** of `tomas-manriquez/dream-ml-d`. Issues had to be enabled, and `gh repo set-default DieguinFC/dream-ml-refactor` is required so PRs never target the parent repo.
 - **SonarCloud must treat `develop` as a long-lived branch.** Its first analysis was short-lived and only measured files changed against `main`.
 - **Sonar's quality gate is "Sonar way" and includes `new_coverage < 80 %`** (risk R1 confirmed). The Python profile was updated on 2026-11-10, after the baseline analyses.
+- **Hooks re-evaluated before block F (2026-11-21), on the professor's suggestion.** Each rule goes in the cheapest layer that enforces it for everyone: git hooks apply to every author, including Claude's commits; Claude hooks only cover what an agent does outside git; CI and rulesets stay the real boundary. Git hooks gained: `Refs #<n>` from the branch name, a block on AI co-author trailers, a pre-push check of branch name and target, and Ruff's CI error rules on changed backend files. Block F drops the rules git hooks now cover (commits and pushes to `main` or `develop`) and adds: asking before editing an existing test, Ruff after each Python edit, and branch and uncommitted-change context at session start.
 
 ## 1. What this phase builds
 
