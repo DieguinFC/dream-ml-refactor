@@ -173,6 +173,17 @@ Claude Code enforces part of this table through the shared project settings in `
 
 The settings also deny reading `.env` and ask before editing CI, Sonar, coverage, hook or baseline files. Git hooks and GitHub rulesets still apply to every author; these hooks only add what an agent could do outside them. Their tests are in `.claude/hooks/tests` and run in the `process` check.
 
+Skills in `.claude/skills/` repeat each workflow step the same way. They check and prepare; the author runs every command with an external effect (commit, push, PR, issue changes, merge), which a skill gives as its last step:
+
+| Skill | What it does |
+|---|---|
+| `/start-task <issue>` | Checks the Definition of Ready, gives the branch commands, and proposes a plan that the author approves before any edit |
+| `/verify` | Runs the checks for the changed paths and reports their real output and the manual checks still needed |
+| `/commit` | Groups changes by concern and gives `git add` with explicit paths and a Conventional Commits message |
+| `/open-pr` | Checks the branch, verifies, reviews the diff, fills the PR template, and gives the push and `gh pr create` commands |
+
+Only the author can start `/start-task`, `/commit` and `/open-pr`; Claude may run `/verify` on its own.
+
 - Commits are authored by the person responsible for the change. **AI tools are not added as co-authors.**
 - Every PR fills in the **AI usage** section of the template: which parts were assisted, and confirmation that the author reviewed and understands the whole diff.
 - The author is responsible for every line merged, whoever wrote it.
