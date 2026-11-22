@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Edit(./.env)"
+    ],
+    "ask": [
+      "Edit(./.github/workflows/**)",
+      "Edit(./sonar-project.properties)",
+      "Edit(./DREAM-ML-backend/GEML/.coveragerc)",
+      "Edit(./.pre-commit-config.yaml)",
+      "Edit(./scripts/hooks/**)",
+      "Edit(./scripts/ci/**)",
+      "Edit(./.claude/settings.json)",
+      "Edit(./.claude/hooks/**)",
+      "Edit(./Docs/baseline/**)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard_commands.py\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

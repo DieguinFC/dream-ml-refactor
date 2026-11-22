@@ -20,7 +20,12 @@ build-backend-arm64.log
 build-frontend-amd64.log
 build-frontend-arm64.log
 .env
-.claude/
+# Project Claude Code settings, hooks and skills are shared; personal settings and local state are not.
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
+!.claude/skills/
+__pycache__/
 DREAM-ML-backend/GEML/datasets/tests
 DREAM-ML-backend/GEML/DREAM-ML-backend/GEML/.coverage
 dependency-security/reports
