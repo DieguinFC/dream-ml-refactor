@@ -7,6 +7,7 @@ DREAM-ML-backend/GEML/api/__pycache__/
 DREAM-ML-backend/GEML/.pytest_cache/
 DREAM-ML-backend/GEML/api/migrations/
 DREAM-ML-backend/GEML/.coverage
+DREAM-ML-backend/GEML/coverage.xml
 DREAM-ML-backend/GEML/GEML/__pycache__/
 experimentos/
 host_experimentos/
@@ -26,6 +27,8 @@ build-frontend-arm64.log
 !.claude/hooks/
 !.claude/skills/
 __pycache__/
+# Written by VS Code when the dev container is built; not versioned for now.
+.devcontainer/devcontainer-lock.json
 DREAM-ML-backend/GEML/datasets/tests
 DREAM-ML-backend/GEML/DREAM-ML-backend/GEML/.coverage
 dependency-security/reports
