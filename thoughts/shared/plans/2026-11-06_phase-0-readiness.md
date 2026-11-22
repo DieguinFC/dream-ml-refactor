@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In progress. Blocks A to F done (dev container parity test pending in #7); see [Decisions changed since the draft](#decisions-changed-since-the-draft). |
+| **Status** | In progress. Blocks A to G done (dev container parity test pending in #7; skills prepare commands and the author runs them); see [Decisions changed since the draft](#decisions-changed-since-the-draft). |
 | **Date** | 2026-11-06 |
 | **Goal** | Build the six process layers so that Phase 0 runs through one standard, enforced flow |
 | **Effort** | 6 to 7 working days (my estimate) |
