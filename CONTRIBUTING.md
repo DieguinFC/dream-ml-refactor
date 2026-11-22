@@ -162,6 +162,14 @@ AI tools (Claude Code, Copilot) may be used, under these permissions:
 | Commit locally | CI, threshold, Sonar or hook changes | Merge to `main` |
 | Generate reports | Opening a PR | Grant exceptions or touch the frozen baseline |
 
+Claude Code enforces part of this table through the shared project settings in `.claude/settings.json` and the hooks in `.claude/hooks/` (personal settings go in `.claude/settings.local.json`, which is ignored):
+
+| Hook | When | What it does |
+|---|---|---|
+| `guard_commands.py` | Before each shell command | Blocks skipping checks (`--no-verify`, `SKIP=`, `core.hooksPath`), `git reset --hard`, `git clean -f`, `git add -A`/`.`/`--all`, `git commit -a`, deleting remote refs, `gh pr merge`, `gh pr review --approve`, `exception:*` labels, changes to rulesets, secrets, variables or repo settings, reading `.env` or `SONAR_TOKEN`, and any change to the `baseline-pre-refactor` tag |
+
+The settings also deny reading `.env` and ask before editing CI, Sonar, coverage, hook or baseline files. Git hooks and GitHub rulesets still apply to every author; these hooks only add what an agent could do outside them. Their tests are in `.claude/hooks/tests` and run in the `process` check.
+
 - Commits are authored by the person responsible for the change. **AI tools are not added as co-authors.**
 - Every PR fills in the **AI usage** section of the template: which parts were assisted, and confirmation that the author reviewed and understands the whole diff.
 - The author is responsible for every line merged, whoever wrote it.
