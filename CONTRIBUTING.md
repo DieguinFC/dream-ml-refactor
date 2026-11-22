@@ -167,6 +167,9 @@ Claude Code enforces part of this table through the shared project settings in `
 | Hook | When | What it does |
 |---|---|---|
 | `guard_commands.py` | Before each shell command | Blocks skipping checks (`--no-verify`, `SKIP=`, `core.hooksPath`), `git reset --hard`, `git clean -f`, `git add -A`/`.`/`--all`, `git commit -a`, deleting remote refs, `gh pr merge`, `gh pr review --approve`, `exception:*` labels, changes to rulesets, secrets, variables or repo settings, reading `.env` or `SONAR_TOKEN`, and any change to the `baseline-pre-refactor` tag |
+| `guard_tests.py` | Before editing a file | Asks the author before an existing test changes; new test files are allowed |
+| `ruff_after_edit.py` | After editing backend Python | Runs the `ruff-check` git hook on the file and shows errors to Claude |
+| `session_context.py` | At session start | Tells Claude the branch, its issue, unpushed commits and uncommitted changes |
 
 The settings also deny reading `.env` and ask before editing CI, Sonar, coverage, hook or baseline files. Git hooks and GitHub rulesets still apply to every author; these hooks only add what an agent could do outside them. Their tests are in `.claude/hooks/tests` and run in the `process` check.
 
