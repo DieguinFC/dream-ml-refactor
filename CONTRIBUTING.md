@@ -181,8 +181,11 @@ Skills in `.claude/skills/` repeat each workflow step the same way. They check a
 | `/verify` | Runs the checks for the changed paths and reports their real output and the manual checks still needed |
 | `/commit` | Groups changes by concern and gives `git add` with explicit paths and a Conventional Commits message |
 | `/open-pr` | Checks the branch, verifies, reviews the diff, fills the PR template, and gives the push and `gh pr create` commands |
+| `/create-issues <phase>` | Drafts a phase's issues, missing labels and milestone without duplicates, and gives the commands to create them |
+| `/handle-review <pr>` | Turns the professor's comments on a merged PR into `review:follow-up` issue drafts, and gives the commands for the issues and labels |
+| `/weekly-report` | Read-only summary of merged PRs, reviews, flags, exceptions, open work and Sonar metrics on `develop` |
 
-Only the author can start `/start-task`, `/commit` and `/open-pr`; Claude may run `/verify` on its own.
+Only the author can start the skills with external effects; Claude may run `/verify` and `/weekly-report` on its own.
 
 - Commits are authored by the person responsible for the change. **AI tools are not added as co-authors.**
 - Every PR fills in the **AI usage** section of the template: which parts were assisted, and confirmation that the author reviewed and understands the whole diff.
