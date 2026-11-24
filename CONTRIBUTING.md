@@ -142,15 +142,16 @@ A PR is done when:
 
 ## Coverage
 
-Enforced by the `backend` job in `.github/workflows/ci.yml`:
+Enforced by the `backend` and `sonar` jobs in `.github/workflows/ci.yml`:
 
 | Rule | Threshold |
 |---|---|
+| New code in a PR, backend and frontend (SonarCloud quality gate) | **80 %**; Sonar skips it on small changes |
 | Global backend coverage (ratchet) | Starts at **47 %**, the measured baseline rounded down. Raised at the end of each phase, never lowered |
 | Changed backend lines in a PR (`diff-cover`) | **95 %** |
-| Exception | The `exception:coverage` label, applied only by the repository owner with the reason written in the PR. The shortfall stays visible in the CI run |
+| Exception | The `exception:coverage` label, applied only by the repository owner with the reason written in the PR. The shortfall stays visible in the CI run. It covers both `diff-cover` and Sonar's new-code coverage, but Sonar passes only if coverage is the single failing condition (`scripts/ci/sonar_gate.py`). Add the label, then re-run the failed jobs |
 
-Frontend tests run in CI and their coverage is sent to SonarCloud. Frontend coverage thresholds are enforced once `TrainCard` and `TSTrainCard` have tests.
+Frontend tests run in CI and their coverage is sent to SonarCloud. Separate frontend coverage thresholds are enforced once `TrainCard` and `TSTrainCard` have tests.
 
 ## AI assistants
 
