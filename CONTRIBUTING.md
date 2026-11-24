@@ -23,6 +23,8 @@ The dev container does this automatically. Run `pre-commit install` again whenev
 
 Never bypass them with `--no-verify`; if a hook is wrong, fix it in a PR. Their scripts are in `scripts/hooks/`.
 
+The push check does not see branch deletions (`git push origin :<branch>` or `--delete`), because pre-commit skips them. On `main` and `develop`, the GitHub rulesets block them. A refspec with an empty variable, such as `"${x}:main"`, is also a deletion.
+
 ## Workflow
 
 ```text
@@ -166,7 +168,7 @@ Claude Code enforces part of this table through the shared project settings in `
 
 | Hook | When | What it does |
 |---|---|---|
-| `guard_commands.py` | Before each shell command | Blocks skipping checks (`--no-verify`, `SKIP=`, `core.hooksPath`), `git reset --hard`, `git clean -f`, `git add -A`/`.`/`--all`, `git commit -a`, deleting remote refs, `gh pr merge`, `gh pr review --approve`, `exception:*` labels, changes to rulesets, secrets, variables or repo settings, reading `.env` or `SONAR_TOKEN`, and any change to the `baseline-pre-refactor` tag |
+| `guard_commands.py` | Before each shell command | Blocks skipping checks (`--no-verify`, `SKIP=`, `core.hooksPath`), `git reset --hard`, `git clean -f`, `git add -A`/`.`/`--all`, `git commit -a`, deleting remote refs (also with `:<ref>` or `$var:<ref>`), `+` refspecs to `main` or `develop`, `gh pr merge`, `gh pr review --approve`, `exception:*` labels, changes to rulesets, secrets, variables or repo settings, reading `.env` or `SONAR_TOKEN`, and any change to the `baseline-pre-refactor` tag |
 | `guard_tests.py` | Before editing a file | Asks the author before an existing test changes; new test files are allowed |
 | `ruff_after_edit.py` | After editing backend Python | Runs the `ruff-check` git hook on the file and shows errors to Claude |
 | `session_context.py` | At session start | Tells Claude the branch, its issue, unpushed commits and uncommitted changes |
