@@ -21,6 +21,9 @@ SHELLS = {"bash", "sh", "zsh", "powershell", "pwsh", "cmd"}
 # git options that take a separate value before the subcommand.
 GIT_OPTIONS_WITH_VALUE = {"-C", "-c", "--git-dir", "--work-tree", "--namespace", "--exec-path"}
 BASELINE_TAG = "baseline-pre-refactor"
+PROTECTED_BRANCHES = {"main", "develop"}
+# A push source made only of shell variables or substitutions, which may be empty when the command runs.
+VARIABLE_SOURCE_RE = re.compile(r"(\$\{[^}]*\}|\$\(.*\)|`.*`|\$[A-Za-z_][\w:]*)+")
 GH_ADMIN_PATH_RE = re.compile(
     r"(^|/)(rulesets|branches/[^/]+/protection|secrets|variables|environments|collaborators"
     r"|hooks|keys|actions/permissions)(/|$)|^/?repos/[^/]+/[^/]+/?$|^/?orgs/"
@@ -110,6 +113,24 @@ def check_git(args, env_vars):
             return f"Frozen: the {BASELINE_TAG} tag must not change."
     if sub == "push" and ("--mirror" in rest or "--delete" in rest or "d" in flags):
         return "Destructive: deleting or mirroring remote refs is not allowed. Ask the author."
+    if sub == "push":
+        for arg in rest:
+            reason = None if arg.startswith("-") else check_refspec(arg)
+            if reason:
+                return reason
+    return None
+
+
+def check_refspec(refspec):
+    """Return the reason to block a git push refspec ([+]source[:destination]), or None."""
+    forced = refspec.startswith("+")
+    source, colon, destination = refspec.lstrip("+").rpartition(":")  # git splits at the last colon
+    if colon and not source:
+        return "Destructive: a refspec without a source deletes the remote ref. Ask the author."
+    if colon and VARIABLE_SOURCE_RE.fullmatch(source):
+        return "Destructive: an empty variable would delete the remote ref. Write the branch or commit explicitly."
+    if forced and destination.removeprefix("refs/heads/") in PROTECTED_BRANCHES:
+        return "Protected history: do not force-push to main or develop."
     return None
 
 
