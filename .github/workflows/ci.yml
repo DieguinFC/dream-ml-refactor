@@ -319,15 +319,28 @@ jobs:
             exit 1
           fi
 
-      - name: Scan and wait for the quality gate
+      - name: Scan
         uses: SonarSource/sonarqube-scan-action@v8.4.1
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
             -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
-            -Dsonar.qualitygate.wait=true
-            -Dsonar.qualitygate.timeout=600
+
+      # Separate from the scan, so a failed scan and a failed gate are told apart.
+      - name: Wait for the quality gate
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          # Labels are read at run time, so re-running the job sees a label added later.
+          LABELS=""
+          if [ -n "$PR_NUMBER" ]; then
+            LABELS=$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json labels --jq '.labels[].name')
+          fi
+          export LABELS
+          python3 scripts/ci/sonar_gate.py
 
   ci-gate:
     name: ci-gate
