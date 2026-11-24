@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In progress. Blocks A to I done, with follow-ups in #37, #38 and #39 (dev container parity test pending in #7; skills prepare commands and the author runs them); see [Decisions changed since the draft](#decisions-changed-since-the-draft). |
+| **Status** | In progress. Blocks A to I done, with one follow-up open in #37 (dev container parity test pending in #7; skills prepare commands and the author runs them); see [Decisions changed since the draft](#decisions-changed-since-the-draft). |
 | **Date** | 2026-11-06 |
 | **Goal** | Build the six process layers so that Phase 0 runs through one standard, enforced flow |
 | **Effort** | 6 to 7 working days (my estimate) |
@@ -751,7 +751,8 @@ The throwaway PRs were closed without merging.
 
 Other findings:
 
-- `guard_tests.py` returned `ask` before an existing test was edited, but the author saw no prompt. The session was in auto mode. `process` still added `flag:test-changed`. Edits made through the shell trigger neither this hook nor the `ask` rules. Tracked in #39.
+- **Corrected in #39:** #40 recorded that the author saw no prompt when `guard_tests.py` returned `ask` in auto mode. That was wrong: the session log shows the author accepted it once, with the reason `hook:PreToolUse`. Two live attempts on 2026-11-24, one in auto mode and one in manual mode, both asked; the author rejected them and the test did not change.
+- Edits made through the shell trigger neither `guard_tests.py` nor the `ask` rules. `process` flags the changed tests and configuration in the PR, except `scripts/hooks/`, which its rule does not list.
 - A `develop` to `main` PR would fail today: `Secret scan` reports 491 `generic-api-key` findings in one commit's `Docs/baseline/` exports, which look like Sonar identifiers but were not reviewed one by one, and `process` treats old skips and the Sonar settings as new. This needs an issue before the first release (block J).
 - `dependency-security` failed with exit code 127 on #35. It is not required and the cause was not investigated.
 
