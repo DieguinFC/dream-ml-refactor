@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In progress. Blocks A to H done, block I in progress (dev container parity test pending in #7; skills prepare commands and the author runs them); see [Decisions changed since the draft](#decisions-changed-since-the-draft). |
+| **Status** | In progress. Blocks A to I done, with follow-ups in #37, #38 and #39 (dev container parity test pending in #7; skills prepare commands and the author runs them); see [Decisions changed since the draft](#decisions-changed-since-the-draft). |
 | **Date** | 2026-11-06 |
 | **Goal** | Build the six process layers so that Phase 0 runs through one standard, enforced flow |
 | **Effort** | 6 to 7 working days (my estimate) |
@@ -736,7 +736,7 @@ The throwaway PRs were closed without merging.
 | 3 | Passed: reported 0 % with a warning and did not fail | #31, attempt 2 |
 | 4 | Passed | #35 |
 | 5 | Passed. Branch created on GitHub, because the pre-push hook rejects the name | #34 |
-| 6 | Pending: runs on the PR that adds this table | |
+| 6 | Passed: `process` failed while the box was unchecked and passed once it was checked; `CI` ran once | #40 |
 | 7 | Passed | #36 |
 | 8 | Passed | #36 |
 | 9 | Passed | #33 |
@@ -751,7 +751,7 @@ The throwaway PRs were closed without merging.
 
 Other findings:
 
-- `guard_tests.py` returned `ask` before an existing test was edited, but the author saw no prompt. The session was in auto mode. `process` still added `flag:test-changed`. Edits made through the shell trigger neither this hook nor the `ask` rules.
+- `guard_tests.py` returned `ask` before an existing test was edited, but the author saw no prompt. The session was in auto mode. `process` still added `flag:test-changed`. Edits made through the shell trigger neither this hook nor the `ask` rules. Tracked in #39.
 - A `develop` to `main` PR would fail today: `Secret scan` reports 491 `generic-api-key` findings in one commit's `Docs/baseline/` exports, which look like Sonar identifiers but were not reviewed one by one, and `process` treats old skips and the Sonar settings as new. This needs an issue before the first release (block J).
 - `dependency-security` failed with exit code 127 on #35. It is not required and the cause was not investigated.
 
