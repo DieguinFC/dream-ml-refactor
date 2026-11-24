@@ -56,7 +56,7 @@ class TestCodificarDatos:
         assert 'cat_feature_B' in result_df.columns, "Dummy column for 'B' should exist (drop_first=True drops 'A')"
         assert 'cat_feature_C' in result_df.columns, "Dummy column for 'C' should exist"
         assert 'num_feature' in result_df.columns, "Numeric feature should be preserved"
-        assert 'target' in result_df.columns, "Target should be preserved"
+        assert 'target' not in result_df.columns, "Gate test 1 for issue #30: fails on purpose, never merge"
 
         # Assert - CSV file created and matches
         assert os.path.exists(output_csv), "Output CSV file should be created"
