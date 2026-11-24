@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In progress. Blocks A to G done (dev container parity test pending in #7; skills prepare commands and the author runs them); see [Decisions changed since the draft](#decisions-changed-since-the-draft). |
+| **Status** | In progress. Blocks A to H done, block I in progress (dev container parity test pending in #7; skills prepare commands and the author runs them); see [Decisions changed since the draft](#decisions-changed-since-the-draft). |
 | **Date** | 2026-11-06 |
 | **Goal** | Build the six process layers so that Phase 0 runs through one standard, enforced flow |
 | **Effort** | 6 to 7 working days (my estimate) |
@@ -19,6 +19,8 @@ Recorded on 2026-11-16. Where this plan disagrees with the list below, the list 
 - **SonarCloud must treat `develop` as a long-lived branch.** Its first analysis was short-lived and only measured files changed against `main`.
 - **Sonar's quality gate is "Sonar way" and includes `new_coverage < 80 %`** (risk R1 confirmed). The Python profile was updated on 2026-11-10, after the baseline analyses.
 - **Hooks re-evaluated before block F (2026-11-21), on the professor's suggestion.** Each rule goes in the cheapest layer that enforces it for everyone: git hooks apply to every author, including Claude's commits; Claude hooks only cover what an agent does outside git; CI and rulesets stay the real boundary. Git hooks gained: `Refs #<n>` from the branch name, a block on AI co-author trailers, a pre-push check of branch name and target, and Ruff's CI error rules on changed backend files. Block F drops the rules git hooks now cover (commits and pushes to `main` or `develop`) and adds: asking before editing an existing test, Ruff after each Python edit, and branch and uncommitted-change context at session start.
+- **Block H as built (2026-11-23).** `protect-main` has 0 approvals and does not require the branch to be up to date: each release adds a merge commit to `main` that `develop` does not have, so the rule would force a sync PR before every release. `protect-develop` keeps it. The labels already existed.
+- **Risk R1 decided (2026-11-24): keep Sonar's gate, with a visible exception.** The plan recommended dropping coverage from the gate, but `diff-cover` only measures the backend, so the frontend would have no coverage check. `exception:coverage` will also cover Sonar when `new_coverage` is the only failing condition (#37). Recorded in `Docs/baseline/manifest.json`, because the baseline README is frozen.
 
 ## 1. What this phase builds
 
@@ -723,6 +725,36 @@ Do not silently change the gate.
 
 Test 17 shows why CI is the final barrier.
 
+### I3. Results (2026-11-24, issue #30)
+
+The throwaway PRs were closed without merging.
+
+| # | Result | Evidence |
+|---|---|---|
+| 1 | Passed: `ci-gate` red, Sonar still published, merge blocked | #36 |
+| 2 | Passed: `diff-cover` failed (0 % of 5 lines) | #31, attempt 1 |
+| 3 | Passed: reported 0 % with a warning and did not fail | #31, attempt 2 |
+| 4 | Passed | #35 |
+| 5 | Passed. Branch created on GitHub, because the pre-push hook rejects the name | #34 |
+| 6 | Pending: runs on the PR that adds this table | |
+| 7 | Passed | #36 |
+| 8 | Passed | #36 |
+| 9 | Passed | #33 |
+| 10 | Passed | #34 |
+| 11 | Passed: the pre-push hook and then GitHub (`GH013`) rejected pushes to both branches. Gap: the git hook does not run on branch deletions, and the Claude guard misses `:branch` and `+ref` refspecs. GitHub rejected an accidental deletion of `main` | #38 |
+| 12 | Adapted, since `main` needs no approval: merge blocked while `process` is red | #35 |
+| 13 | R1 confirmed: a two-statement frontend function without tests passed; 25 lines to cover failed only on `new_coverage` (0 %) | #32 |
+| 14 | Passed for the 12 guard rules tried live. `git reset --hard` and `gh repo edit` are covered by unit tests only | Session |
+| 15 | Passed: confirmation was requested; the edit was accepted and reverted | Session |
+| 16 | Passed, with the Read tool and the shell | Session |
+| 17 | Passed: gitleaks blocked the normal commit, and CI caught the one made with the hooks skipped | #33 |
+
+Other findings:
+
+- `guard_tests.py` returned `ask` before an existing test was edited, but the author saw no prompt. The session was in auto mode. `process` still added `flag:test-changed`. Edits made through the shell trigger neither this hook nor the `ask` rules.
+- A `develop` to `main` PR would fail today: `Secret scan` reports 491 `generic-api-key` findings in one commit's `Docs/baseline/` exports, which look like Sonar identifiers but were not reviewed one by one, and `process` treats old skips and the Sonar settings as new. This needs an issue before the first release (block J).
+- `dependency-security` failed with exit code 127 on #35. It is not required and the cause was not investigated.
+
 ---
 
 ## Block J: Backlog and pilot
@@ -782,11 +814,11 @@ Update `CONTRIBUTING.md` through a normal PR, then generate the first `/weekly-r
 - [ ] The seven skills work
 - [ ] Hooks are versioned, tested and active
 - [ ] `pre-commit` rejects each D2 case
-- [ ] Both rulesets are active with empty bypass lists, and `ci-gate` and `process` are required
+- [x] Both rulesets are active with empty bypass lists, and `ci-gate` and `process` are required
 
 **Proof**
 - [ ] All tests in block I gave the expected result
-- [ ] The Sonar coverage question has a recorded decision
+- [x] The Sonar coverage question has a recorded decision
 - [ ] Phase 0 tasks are on the board
 - [ ] Both pilot tasks merged through the full flow
 - [ ] The retrospective's changes are merged

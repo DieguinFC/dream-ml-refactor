@@ -129,6 +129,12 @@
         "change": "Frontend coverage reporting added (task 0.39): Vitest writes DREAM-ML-frontend/frontend/coverage/lcov.info and sonar-project.properties sets sonar.javascript.lcov.reportPaths. Sources and exclusions are unchanged.",
         "impact": "In the baseline, Sonar received no frontend coverage report, so frontend lines counted as uncovered in the 36.1 % project coverage. From this change on, frontend lines exercised by tests count as covered. Compare backend coverage (47.59 % in ci-run/coverage-report.txt) separately from project-wide coverage.",
         "method": "Vitest v8 coverage with experimentalAstAwareRemapping and all: false: only files loaded by tests are reported, and their executable lines match Sonar's own count (ProgressBar.jsx: 43 lines to cover in both). Files without tests keep Sonar's computed lines to cover, as in the baseline. A first run with plain v8 coverage of all files raised project lines to cover from 8614 to 18651 and dropped coverage to 17.1 % without any real change; that configuration was discarded."
+      },
+      {
+        "recorded_on": "2026-11-24",
+        "change": "Risk R1 decision: SonarCloud's quality gate stays required. The owner's exception:coverage label will also cover Sonar when new_coverage is the only failing condition (issue #37).",
+        "evidence": "Gate test 13 (PR #32, closed without merging): a frontend function with two statements and no tests passed; 25 uncovered frontend lines failed the gate only on new_coverage (0 %, 80 % required). PR #31 (5 uncovered backend lines) passed with ignoredConditions true, so Sonar skips this condition on small changes.",
+        "impact": "Gate conditions, sources and exclusions are unchanged, so baseline comparisons are unaffected. Each exception stays visible in its PR."
       }
     ]
   },
