@@ -221,3 +221,5 @@ The PR title is `revert: <original title>` and explains why.
 ## Versioning
 
 [Semantic Versioning](https://semver.org/). The starting point is the tag `baseline-pre-refactor`. The end of Phase 0 is tagged `v0.1.0`, and each later phase bumps the minor version.
+
+
