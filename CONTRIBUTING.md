@@ -173,7 +173,7 @@ Claude Code enforces part of this table through the shared project settings in `
 | `ruff_after_edit.py` | After editing backend Python | Runs the `ruff-check` git hook on the file and shows errors to Claude |
 | `session_context.py` | At session start | Tells Claude the branch, its issue, unpushed commits and uncommitted changes |
 
-The settings also deny reading `.env` and ask before editing CI, Sonar, coverage, hook or baseline files. Git hooks and GitHub rulesets still apply to every author; these hooks only add what an agent could do outside them. Their tests are in `.claude/hooks/tests` and run in the `process` check.
+The settings also deny reading `.env` and ask before editing CI, Sonar, coverage, hook or baseline files. Both this and `guard_tests.py` only see Claude's edit tools: files changed through the shell are not asked about, and `process` flags changed tests and configuration in the PR, except `scripts/hooks/`. Git hooks and GitHub rulesets still apply to every author; these hooks only add what an agent could do outside them. Their tests are in `.claude/hooks/tests` and run in the `process` check.
 
 Skills in `.claude/skills/` repeat each workflow step the same way. They check and prepare; the author runs every command with an external effect (commit, push, PR, issue changes, merge), which a skill gives as its last step:
 
