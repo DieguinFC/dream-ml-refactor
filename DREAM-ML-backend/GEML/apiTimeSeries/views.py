@@ -433,7 +433,7 @@ def train_model(request):
             "run_id": result.get("run_id", ""),
             "metrics": result.get("val_metrics", {}),  
             "model_path": result.get("model_path", ""),
-            "mlflow_ui": f"http://{os.environ.get('MLFLOW_UI_URL', 'http://localhost:5000')}/#/experiments/{mlflow_experiment_id}/runs/{result.get('run_id', '')}"
+            "mlflow_ui": f"{os.environ.get('MLFLOW_UI_URL', 'http://localhost:5000')}/#/experiments/{mlflow_experiment_id}/runs/{result.get('run_id', '')}"
         }, status=200)
 
     except json.JSONDecodeError as e:
