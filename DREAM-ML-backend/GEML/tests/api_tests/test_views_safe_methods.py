@@ -38,3 +38,31 @@ def test_get_pipeline_config_does_not_need_a_csrf_token(tmp_path):
     response = client.get("/api/get-pipeline-config/", {"directory_path": str(tmp_path)})
 
     assert response.status_code == 404
+
+
+CSRF_SECRET = "a" * 32
+READ_ONLY_URLS = ["/api/get-pipeline-config/", "/api/get-experiment-summary/"]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("url", READ_ONLY_URLS)
+@pytest.mark.parametrize("method", ["post", "put", "patch", "delete"])
+def test_unsafe_methods_without_csrf_token_return_403(url, method):
+    client = Client(enforce_csrf_checks=True)
+
+    response = getattr(client, method)(url)
+
+    assert response.status_code == 403
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("url", READ_ONLY_URLS)
+@pytest.mark.parametrize("method", ["post", "put", "patch", "delete"])
+def test_unsafe_methods_with_csrf_token_return_405(url, method):
+    client = Client(enforce_csrf_checks=True)
+    client.cookies["csrftoken"] = CSRF_SECRET
+
+    response = getattr(client, method)(url, headers={"X-CSRFToken": CSRF_SECRET})
+
+    assert response.status_code == 405
+    assert set(response["Allow"].split(", ")) == {"GET", "HEAD"}
