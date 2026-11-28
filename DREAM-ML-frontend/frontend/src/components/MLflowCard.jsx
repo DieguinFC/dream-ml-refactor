@@ -71,7 +71,7 @@ const MLflowCard = () => {
       });
 
       // Abrir MLflow en una nueva pestaña
-      window.open("http://127.0.0.1:5000/", "_blank");
+      window.open("http://127.0.0.1:5000/", "_blank", "noopener,noreferrer");
     } catch (error) {
       const errorMessage = error.response?.data?.status || "Error al iniciar MLflow";
       
