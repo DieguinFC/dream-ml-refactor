@@ -36,6 +36,7 @@ from django.shortcuts import render
 # Create your views here.
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_safe
 # ─────────────────────────────────────────────────────────────────────────────
 # Modulos locales
 # ─────────────────────────────────────────────────────────────────────────────
@@ -53,6 +54,7 @@ logger = logging.getLogger(__name__)
 
 mlflow_process = None  # Estado global del proceso MLflow
 
+@require_safe
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
 

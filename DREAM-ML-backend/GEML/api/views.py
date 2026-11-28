@@ -34,6 +34,7 @@ import mlflow
 # ─────────────────────────────────────────────────────────────────────────────
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_safe
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -891,7 +892,7 @@ def train_model(request):
 
 
 
-@csrf_exempt
+@require_safe
 def get_pipeline_config(request):
     directory_path = request.GET.get("directory_path")
     pipeline_config_path = os.path.join(directory_path, "pipeline_config.json")
@@ -935,7 +936,7 @@ def run_pipeline(request):
 
 
 
-@csrf_exempt
+@require_safe
 def get_experiment_summary(request):
     """
     Vista Django que genera y devuelve el resumen del experimento en PDF
